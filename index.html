@@ -1,66 +1,339 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#9B4DCC">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Nymia">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icon-192.png">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>Nymia</title>
 <style>
-:root{--bg:#fbf8fb;--card:#fff;--txt:#271d2e;--muted:#7f7487;--p:#9b4dcc;--light:#f0e6f5;--line:#eee5f1;--ok:#dff5e8}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-.app{max-width:480px;min-height:100vh;margin:auto;padding:22px 18px 100px}.screen{display:none}.screen.active{display:block}
-h1{font-size:28px;margin:8px 0 18px}h2{font-size:20px}.muted{color:var(--muted)}.brand{text-align:center;padding-top:22vh}.brand .bird{font-size:68px}.brand b{display:block;color:var(--p);letter-spacing:7px;font-size:35px}
-.btn{width:100%;border:0;border-radius:16px;padding:16px;margin-top:12px;font-weight:800;font-size:16px;background:var(--p);color:white}.btn.alt{background:white;color:var(--p);border:1px solid #d8b6e6}
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:15px;margin:11px 0}.row{display:flex;gap:12px;align-items:center}.icon{width:45px;height:45px;border-radius:14px;background:var(--light);display:grid;place-items:center;font-size:23px}
-.title{font-weight:800}.small{font-size:13px;color:var(--muted);margin-top:4px}.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);max-width:480px;width:100%;height:80px;background:white;border-top:1px solid var(--line);display:flex;justify-content:space-around;align-items:center}.nav button{border:0;background:none;color:var(--muted)}.scan{width:56px;height:56px;border-radius:50%;background:var(--p)!important;color:white!important;font-size:24px;margin-top:-28px}
-.input{width:100%;padding:14px;border-radius:13px;border:1px solid var(--line);margin:6px 0 10px;font-size:16px;background:white}.back{color:var(--p);font-weight:800}.take{display:flex;gap:8px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}.take button{margin-left:auto;border:0;border-radius:10px;padding:8px 10px}.done{background:var(--ok)}.notice{padding:14px;border-radius:15px;background:var(--light);margin:12px 0}
+:root{
+  --bg:#fbf8fb;
+  --card:#ffffff;
+  --text:#241b2d;
+  --muted:#7f7487;
+  --primary:#9b4dcc;
+  --primary2:#d89bdc;
+  --line:#eee6f1;
+  --success:#41b979;
+  --warning:#f2ad3c;
+  --danger:#e45c6b;
+  --shadow:0 8px 30px rgba(76,34,94,.10);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  background:linear-gradient(180deg,#f7eff8,#fff);
+  color:var(--text);
+}
+.app{
+  width:min(100%,430px);
+  min-height:100vh;
+  margin:0 auto;
+  background:var(--bg);
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 0 50px rgba(0,0,0,.08);
+}
+.screen{display:none;min-height:100vh;padding:24px 18px 100px}
+.screen.active{display:block}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.logo{font-size:58px;margin-bottom:8px}
+.brand{font-size:34px;letter-spacing:8px;font-weight:700;color:var(--primary)}
+.tag{color:var(--primary);font-weight:600;line-height:1.5}
+h1{font-size:27px;margin:10px 0}
+h2{font-size:20px;margin:18px 0 10px}
+p{color:var(--muted);line-height:1.5}
+.btn{
+  width:100%;border:0;border-radius:16px;padding:16px 18px;font-size:16px;font-weight:700;
+  margin-top:12px;cursor:pointer;
+}
+.btn.primary{color:white;background:linear-gradient(90deg,var(--primary),var(--primary2))}
+.btn.secondary{background:white;color:var(--primary);border:1px solid #dcb9ea}
+.btn.success{background:var(--success);color:white}
+.btn.warning{background:white;color:#d58b00;border:1px solid #f0c46b}
+.btn.danger{background:white;color:var(--danger);border:1px solid #ef9aa3}
+.small-link{margin-top:18px;color:var(--primary);font-weight:600;cursor:pointer}
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.avatar{width:38px;height:38px;border-radius:50%;background:#eee0f4;display:grid;place-items:center}
+.moods{display:flex;justify-content:space-between;font-size:29px;padding:8px 0 14px}
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0;
+  box-shadow:var(--shadow)
+}
+.card-row{display:flex;gap:12px;align-items:center}
+.icon{
+  width:44px;height:44px;border-radius:14px;background:#f2e9f6;display:grid;place-items:center;font-size:22px;flex:none
+}
+.meta{font-size:13px;color:var(--muted)}
+.title{font-weight:750}
+.action-link{color:var(--primary);font-weight:700;font-size:14px;margin-top:8px;display:inline-block}
+.nav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:min(100%,430px);
+  height:78px;background:white;border-top:1px solid var(--line);display:none;justify-content:space-around;
+  align-items:center;padding-bottom:max(6px,env(safe-area-inset-bottom));z-index:20
+}
+.nav.show{display:flex}
+.nav button{background:none;border:0;color:#8f8495;font-size:12px;display:flex;flex-direction:column;gap:4px;align-items:center}
+.nav .scan{width:54px;height:54px;border-radius:50%;background:var(--primary);color:white;font-size:24px;margin-top:-20px}
+.nav .active{color:var(--primary);font-weight:700}
+.camera{
+  background:#0e0e0f;color:white;padding:0;position:relative;min-height:100vh
+}
+.camera .camtop{display:flex;justify-content:space-between;padding:20px;font-size:28px}
+.docframe{
+  width:78%;height:52vh;margin:45px auto 0;border:3px solid #b75ce0;border-radius:18px;
+  background:linear-gradient(150deg,#faf6ec,#fff);color:#444;padding:26px 20px;font-family:serif;
+  box-shadow:0 0 0 999px rgba(0,0,0,.32)
+}
+.shutter{width:72px;height:72px;border:6px solid white;border-radius:50%;margin:42px auto;background:#eee}
+.progress{height:7px;background:#eadff0;border-radius:99px;overflow:hidden;margin-top:24px}
+.progress span{display:block;height:100%;width:70%;background:var(--primary)}
+.checklist div{padding:10px 0;border-bottom:1px solid var(--line)}
+.pill{display:inline-block;padding:5px 10px;border-radius:999px;background:#efe4f4;color:var(--primary);font-size:12px;font-weight:700}
+.task{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.task input{width:20px;height:20px}
+.back{color:var(--primary);font-weight:700;cursor:pointer}
+.notice{background:#f2eafa;border-radius:16px;padding:14px;color:#664477;margin-top:12px}
+
+/* Accueil Nymia v0.2 */
+:root{--violet:#7c3ff2;--cyan:#35cad2;--ink:#17132f;--soft:#77728a;--homebg:#fbfaff}
+#home{padding:calc(18px + env(safe-area-inset-top)) 18px 118px;background:
+ radial-gradient(circle at 85% 8%,rgba(126,68,243,.11),transparent 28%),
+ radial-gradient(circle at 8% 34%,rgba(53,202,210,.08),transparent 24%),var(--homebg)}
+.home-head{display:flex;align-items:center;gap:12px;margin:2px 0 20px}
+.brand-bird{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,#fff,#f3eaff);box-shadow:0 9px 24px rgba(78,47,140,.13)}
+.brand-bird svg{width:35px;height:35px}
+.greeting{min-width:0;flex:1}.greeting h1{font-size:28px;line-height:1.05;margin:0;color:var(--ink);letter-spacing:-.7px}.greeting h1 b{color:var(--violet)}
+.greeting p{margin:7px 0 0;font-size:15px;color:var(--soft)}
+.head-action{width:44px;height:44px;border:0;border-radius:50%;background:#fff;display:grid;place-items:center;box-shadow:0 8px 22px rgba(46,32,82,.1);color:var(--ink);position:relative}
+.head-action:after{content:'';position:absolute;right:8px;top:7px;width:7px;height:7px;border-radius:50%;background:var(--violet);border:2px solid white}
+.scan-hero{text-align:center;margin:12px auto 24px}
+.scan-orb{width:202px;height:202px;border-radius:50%;border:0;color:#fff;background:linear-gradient(145deg,#823af2 5%,#7d54e9 48%,#34cdd1 100%);box-shadow:0 22px 42px rgba(112,63,228,.28),inset 0 0 0 7px rgba(255,255,255,.22);display:flex;flex-direction:column;align-items:center;justify-content:center;margin:auto;position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent;animation:orbBreathe 3.4s ease-in-out infinite}
+.scan-orb:active{transform:scale(.97)}
+.scan-orb svg{width:56px;height:56px;margin-bottom:8px}.scan-orb strong{font-size:27px;letter-spacing:-.4px}.scan-orb small{font-size:13px;line-height:1.35;opacity:.92;margin-top:5px;max-width:145px}
+.scan-hint{display:inline-flex;align-items:center;gap:7px;margin-top:12px;padding:8px 14px;border-radius:999px;background:rgba(124,63,242,.08);color:var(--violet);font-size:13px;font-weight:700}
+@keyframes orbBreathe{0%,100%{box-shadow:0 22px 42px rgba(112,63,228,.25),inset 0 0 0 7px rgba(255,255,255,.22)}50%{box-shadow:0 26px 54px rgba(112,63,228,.36),0 0 0 10px rgba(124,63,242,.045),inset 0 0 0 7px rgba(255,255,255,.25)}}
+.colibri-card{background:rgba(255,255,255,.9);border:1px solid rgba(127,91,205,.1);border-radius:26px;padding:18px;box-shadow:0 14px 36px rgba(58,39,98,.1);backdrop-filter:blur(14px);margin-bottom:26px}
+.colibri-top{display:flex;gap:13px;align-items:flex-start}.colibri-avatar{width:55px;height:55px;border-radius:18px;background:linear-gradient(145deg,#f4eaff,#e9fbfb);display:grid;place-items:center;flex:none}.colibri-avatar svg{width:39px;height:39px}
+.colibri-copy{flex:1}.colibri-title{font-size:18px;font-weight:800;color:var(--ink);display:flex;align-items:center;gap:7px}.ia-chip{font-size:11px;color:var(--violet);background:#f2eaff;border:1px solid #d9c2ff;padding:3px 6px;border-radius:99px}.colibri-copy p{margin:7px 0 0;color:var(--ink);font-size:15px}.colibri-copy p b{color:var(--violet)}
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;margin-top:16px;padding-top:15px;border-top:1px solid #eeeaf5}.summary-item{text-align:center;padding:0 8px;border-right:1px solid #eeeaf5}.summary-item:last-child{border-right:0}.summary-item svg{width:24px;height:24px;margin-bottom:5px}.summary-item b{font-size:12px;line-height:1.25;display:block;color:var(--ink)}.summary-item span{font-size:11px;color:var(--soft)}
+.section-head{display:flex;justify-content:space-between;align-items:center;margin:0 2px 10px}.section-head h2{font-size:21px;color:var(--ink);margin:0}.section-head button{border:0;background:none;color:var(--violet);font-weight:700;font-size:14px}
+.agenda-card{background:#fff;border-radius:22px;box-shadow:0 10px 28px rgba(52,38,84,.08);overflow:hidden;margin-bottom:25px}.agenda-row{display:grid;grid-template-columns:50px 72px 1fr 24px;align-items:center;gap:8px;padding:14px 14px;border-bottom:1px solid #f0edf5}.agenda-row:last-child{border-bottom:0}.agenda-icon{width:42px;height:42px;border-radius:13px;display:grid;place-items:center}.agenda-icon svg{width:23px;height:23px}.agenda-icon.pillbg{background:#f2e8ff;color:#8b47f2}.agenda-icon.calbg{background:#e6fafa;color:#2bb9c3}.agenda-icon.docbg{background:#fff0f1;color:#ee6b72}.agenda-time{font-size:14px;font-weight:800;color:var(--violet)}.agenda-time.cyan{color:#24b5c1}.agenda-time.coral{color:#ed686e}.agenda-content b{font-size:14px;color:var(--ink);display:block}.agenda-content span{font-size:12px;color:var(--soft)}.chev{color:#aaa3b7;font-size:25px}
+.docs-scroll{display:grid;grid-template-columns:1fr 1fr;gap:12px}.doc-mini{background:#fff;border-radius:20px;padding:14px;box-shadow:0 9px 25px rgba(52,38,84,.07);min-height:112px;display:flex;gap:10px}.doc-mini-icon{width:45px;height:45px;border-radius:14px;display:grid;place-items:center;background:#f1e8ff;color:var(--violet);flex:none}.doc-mini-icon.cyan{background:#e8fafa;color:#24b8c1}.doc-mini svg{width:24px;height:24px}.doc-mini b{font-size:13px;color:var(--ink);line-height:1.3;display:block}.doc-mini span{font-size:11px;color:var(--soft);display:block;margin-top:6px}
+.nav{height:88px;border:0;border-radius:28px 28px 0 0;box-shadow:0 -8px 30px rgba(45,32,76,.12);padding:8px 12px max(8px,env(safe-area-inset-bottom));align-items:flex-start}
+.nav button{width:62px;height:58px;justify-content:center;gap:5px;color:#8a8596;font-size:11px;font-weight:600}.nav button svg{width:24px;height:24px;stroke:currentColor}.nav .scan{width:68px;height:68px;border-radius:50%;background:linear-gradient(145deg,var(--violet),var(--cyan));box-shadow:0 10px 24px rgba(109,67,221,.35);margin-top:-27px;border:6px solid #fff}.nav .scan svg{width:29px;height:29px}.nav .active{color:var(--violet)}
+@media(max-width:360px){.scan-orb{width:180px;height:180px}.summary-item{padding:0 4px}.agenda-row{grid-template-columns:44px 62px 1fr 18px}.docs-scroll{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
 <div class="app">
-<section id="welcome" class="screen active brand"><div class="bird">🐦</div><b>NYMIA</b><p class="muted">Prendre soin de soi, simplement.</p><button class="btn" onclick="go('home')">Commencer</button></section>
-<section id="home" class="screen"><p class="muted">Bonjour</p><h1>Sophie 👋</h1><div class="notice"><b>Suivi du jour</b><div id="count" class="small"></div></div><h2>Aujourd’hui</h2><div id="homeTreatments"></div><div id="homeAppointments"></div><div class="card" onclick="go('scan')"><div class="row"><div class="icon">📷</div><div><div class="title">Scanner un document</div><div class="small">Simulation avec sauvegarde réelle</div></div></div></div></section>
-<section id="health" class="screen"><h1>Mes traitements</h1><div id="treatments"></div><button class="btn alt" onclick="go('addTreatment')">Ajouter un traitement</button><button class="btn alt" onclick="go('history')">Voir l’historique</button></section>
-<section id="addTreatment" class="screen"><span class="back" onclick="go('health')">← Retour</span><h1>Ajouter un traitement</h1><input id="tName" class="input" placeholder="Nom du traitement"><input id="tDose" class="input" placeholder="Dosage"><input id="tTimes" class="input" value="Matin, Midi, Soir"><button class="btn" onclick="addTreatment()">Enregistrer</button></section>
-<section id="history" class="screen"><span class="back" onclick="go('health')">← Retour</span><h1>Historique</h1><div id="historyList"></div></section>
-<section id="appointments" class="screen"><h1>Rendez-vous</h1><div id="appointmentsList"></div><button class="btn alt" onclick="go('addAppointment')">Ajouter un rendez-vous</button></section>
-<section id="addAppointment" class="screen"><span class="back" onclick="go('appointments')">← Retour</span><h1>Ajouter un rendez-vous</h1><input id="aTitle" class="input" placeholder="Motif"><input id="aDoctor" class="input" placeholder="Médecin"><input id="aDate" class="input" type="date"><input id="aTime" class="input" type="time"><input id="aPlace" class="input" placeholder="Adresse"><button class="btn" onclick="addAppointment()">Enregistrer</button></section>
-<section id="documents" class="screen"><h1>Documents</h1><div id="documentsList"></div><button class="btn alt" onclick="go('scan')">Scanner un document</button></section>
-<section id="scan" class="screen"><span class="back" onclick="go('home')">← Retour</span><h1>Scanner</h1><div class="card"><div class="title">Ordonnance détectée</div><p class="muted">Médicament test — 1 comprimé matin et soir.</p></div><button class="btn" onclick="saveScan()">Tout ajouter et sauvegarder</button></section>
-<section id="profile" class="screen"><h1>Profil</h1><div class="card"><div class="title">💾 Sauvegarde locale active</div><div class="small">Les données restent sur cet iPhone.</div></div><button class="btn alt" onclick="resetAll()">Réinitialiser les données</button></section>
+  <section id="welcome" class="screen active center">
+    <div class="logo">🐦</div>
+    <div class="brand">NYMIA</div>
+    <p class="tag">Prendre soin de soi,<br>simplement.</p>
+    <button class="btn primary" onclick="show('intro')">Commencer</button>
+  </section>
+
+  <section id="intro" class="screen center">
+    <div class="logo">📷</div>
+    <h1>Scanne tes documents</h1>
+    <p>Une ordonnance, une analyse ou un compte-rendu : Nymia les organise pour toi.</p>
+    <button class="btn primary" onclick="show('home');toggleNav(true)">Découvrir mon espace</button>
+  </section>
+
+  <section id="home" class="screen">
+    <header class="home-head">
+      <div class="brand-bird" aria-label="Nymia">
+        <svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="birdG" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#36cbd2"/><stop offset=".52" stop-color="#6e55df"/><stop offset="1" stop-color="#a53cf0"/></linearGradient></defs><path fill="url(#birdG)" d="M11 35c13-2 18-9 23-20 2 9 1 15-2 20 9-7 16-6 25-4-8 4-14 8-21 10-6 2-10 7-15 13 1-8 4-13 8-17-7 3-12 3-18-2z"/><path fill="#6b45dc" d="M36 34c7-3 13-3 22-1-8 2-13 4-20 7z"/><circle cx="39" cy="29" r="1.5" fill="#17132f"/></svg>
+      </div>
+      <div class="greeting"><h1>Bonjour <b>Sophie</b></h1><p>Tout est sous contrôle aujourd’hui.</p></div>
+      <button class="head-action" aria-label="Notifications"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg></button>
+    </header>
+
+    <div class="scan-hero">
+      <button class="scan-orb" onclick="show('scanner');toggleNav(false)" aria-label="Scanner un document">
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3"><path d="M15 20v-5h5M44 15h5v5M49 44v5h-5M20 49h-5v-5"/><rect x="20" y="23" width="24" height="19" rx="5"/><circle cx="32" cy="32.5" r="6"/><path d="m25 23 2-4h10l2 4"/></svg>
+        <strong>Scanner</strong><small>Ordonnance, analyse ou compte rendu</small>
+      </button>
+      <div class="scan-hint">↑ Touchez pour commencer</div>
+    </div>
+
+    <article class="colibri-card" onclick="show('appointment')">
+      <div class="colibri-top">
+        <div class="colibri-avatar"><svg viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="birdG2" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#36cbd2"/><stop offset=".52" stop-color="#6e55df"/><stop offset="1" stop-color="#a53cf0"/></linearGradient></defs><path fill="url(#birdG2)" d="M11 35c13-2 18-9 23-20 2 9 1 15-2 20 9-7 16-6 25-4-8 4-14 8-21 10-6 2-10 7-15 13 1-8 4-13 8-17-7 3-12 3-18-2z"/><circle cx="39" cy="29" r="1.5" fill="#17132f"/></svg></div>
+        <div class="colibri-copy"><div class="colibri-title">Colibri <span class="ia-chip">IA</span></div><p><b>Bonjour Sophie,</b><br>Aujourd’hui, tout est à jour.</p></div>
+        <span class="chev">›</span>
+      </div>
+      <div class="summary-grid">
+        <div class="summary-item"><svg viewBox="0 0 24 24" fill="none" stroke="#40bb72" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 6-7"/></svg><b>Aucun médicament</b><span>avant 20h00</span></div>
+        <div class="summary-item"><svg viewBox="0 0 24 24" fill="none" stroke="#8c49ef" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg><b>Prochain RDV</b><span>demain à 10h30</span></div>
+        <div class="summary-item"><svg viewBox="0 0 24 24" fill="none" stroke="#278ed8" stroke-width="2"><path d="M6 2h8l4 4v16H6z"/><path d="M14 2v5h5"/></svg><b>1 document</b><span>à classer</span></div>
+      </div>
+    </article>
+
+    <div class="section-head"><h2>Aujourd’hui</h2><button>Tout voir ›</button></div>
+    <div class="agenda-card">
+      <div class="agenda-row" onclick="show('reminder');toggleNav(false)"><div class="agenda-icon pillbg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m8 16 8-8a4 4 0 1 1 0 6l-8 8a4 4 0 0 1-6-6l8-8"/><path d="m7 13 4 4"/></svg></div><div class="agenda-time">20h00</div><div class="agenda-content"><b>Doliprane 500 mg</b><span>1 comprimé</span></div><span class="chev">›</span></div>
+      <div class="agenda-row" onclick="show('appointment')"><div class="agenda-icon calbg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></div><div class="agenda-time cyan">Demain<br><small>10h30</small></div><div class="agenda-content"><b>Consultation gynécologue</b><span>Dr Martin</span></div><span class="chev">›</span></div>
+      <div class="agenda-row"><div class="agenda-icon docbg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h8l4 4v16H6z"/><path d="M14 2v5h5M9 13h6M9 17h6"/></svg></div><div class="agenda-time coral">12 sept.</div><div class="agenda-content"><b>Prise de sang</b><span>Laboratoire BioSanté</span></div><span class="chev">›</span></div>
+    </div>
+
+    <div class="section-head"><h2>Documents récents</h2><button onclick="goNav('documents',document.querySelectorAll('.nav button')[3])">Tout voir ›</button></div>
+    <div class="docs-scroll">
+      <div class="doc-mini"><div class="doc-mini-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2h8l4 4v16H6z"/><path d="M14 2v5h5M9 13h6M9 17h6"/></svg></div><div><b>Ordonnance<br>Dr Martin</b><span>15 août 2026</span></div></div>
+      <div class="doc-mini"><div class="doc-mini-icon cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2h6M10 2v7l-5 9a3 3 0 0 0 3 4h8a3 3 0 0 0 3-4l-5-9V2"/><path d="M8 16h8"/></svg></div><div><b>Analyse sanguine<br>BioSanté</b><span>10 août 2026</span></div></div>
+    </div>
+  </section>
+
+  <section id="scanner" class="screen camera">
+    <div class="camtop"><span onclick="show('home');toggleNav(true)">×</span><span>⚡</span></div>
+    <div style="text-align:center">Place le document dans le cadre</div>
+    <div class="docframe">
+      <b>Dr Martin</b><br><small>Paris, le 15/08/2026</small>
+      <h3 style="text-align:center;margin-top:60px">Ordonnance</h3>
+      <p>1. Doliprane 500 mg<br>1 comprimé, 3 fois par jour</p>
+      <p>2. Prise de sang<br>Bilan biologique complet</p>
+    </div>
+    <div class="shutter" onclick="show('analysis')"></div>
+  </section>
+
+  <section id="analysis" class="screen center">
+    <div class="logo">🐦</div>
+    <h1>Analyse en cours…</h1>
+    <p>Colibri analyse ton document.</p>
+    <div class="checklist" style="width:100%;text-align:left">
+      <div>✓ Lecture du texte</div>
+      <div>✓ Identification du document</div>
+      <div>✓ Extraction des informations</div>
+    </div>
+    <div class="progress" style="width:100%"><span></span></div>
+    <button class="btn primary" onclick="show('scanresult')">Voir le résultat</button>
+  </section>
+
+  <section id="scanresult" class="screen">
+    <div class="back" onclick="show('scanner')">← Retour</div>
+    <h1>J'ai trouvé :</h1>
+    <div class="card checklist">
+      <div>📄 Ordonnance</div>
+      <div>👨‍⚕️ Dr Martin</div>
+      <div>💊 2 médicaments</div>
+      <div>🩸 1 prise de sang</div>
+      <div>📅 Contrôle dans 3 mois</div>
+    </div>
+    <button class="btn primary" onclick="show('done');toggleNav(false)">Tout ajouter</button>
+    <button class="btn secondary">Modifier avant d'ajouter</button>
+  </section>
+
+  <section id="done" class="screen center">
+    <div class="logo">✅</div>
+    <h1>C'est fait !</h1>
+    <p>J'ai créé le traitement, ajouté la prise de sang et classé l'ordonnance.</p>
+    <button class="btn primary" onclick="show('home');toggleNav(true)">Retour à l'accueil</button>
+  </section>
+
+  <section id="appointment" class="screen">
+    <div class="back" onclick="show('home')">← Retour</div>
+    <h1>Consultation gynécologue</h1>
+    <p>Jeudi 28 août 2026 · 10h30</p>
+    <div class="card">
+      <div class="title">📍 Adresse</div>
+      <div class="meta">12 rue de la Paix, Paris</div>
+    </div>
+    <div class="card">
+      <div class="title">👨‍⚕️ Dr Martin</div>
+      <span class="action-link">Téléphoner</span>
+    </div>
+    <div class="card">
+      <div class="title">📝 Mes questions</div>
+      <span class="action-link">+ Ajouter une question</span>
+    </div>
+    <div class="card">
+      <div class="title">Suivi</div>
+      <label class="task"><input type="checkbox"> Scanner l'ordonnance</label>
+      <label class="task"><input type="checkbox"> Faire la prise de sang</label>
+      <label class="task"><input type="checkbox"> Prendre le rendez-vous de contrôle</label>
+    </div>
+    <button class="btn primary">Le rendez-vous est terminé</button>
+  </section>
+
+  <section id="treatments" class="screen">
+    <div class="topbar"><h1>Mes traitements</h1><div class="avatar">＋</div></div>
+    <div class="card" onclick="show('treatmentdetail')">
+      <div class="card-row">
+        <div class="icon">💊</div>
+        <div><div class="title">Doliprane 500 mg</div><div class="meta">1 comprimé · Matin · Midi · Soir</div></div>
+      </div>
+      <div class="task"><span>Matin</span><span style="margin-left:auto">○</span></div>
+      <div class="task"><span>Midi</span><span style="margin-left:auto">○</span></div>
+      <div class="task"><span>Soir</span><span style="margin-left:auto">○</span></div>
+    </div>
+    <button class="btn secondary" onclick="show('scanner');toggleNav(false)">📷 Scanner une ordonnance</button>
+  </section>
+
+  <section id="treatmentdetail" class="screen">
+    <div class="back" onclick="show('treatments')">← Retour</div>
+    <h1>Doliprane 500 mg</h1>
+    <div class="card"><div class="title">Depuis</div><p>15 août 2026</p></div>
+    <div class="card"><div class="title">Prescription</div><p>Dr Martin</p><span class="action-link">Voir l'ordonnance</span></div>
+    <div class="card"><div class="title">Posologie</div><p>1 comprimé · 3 fois par jour</p></div>
+    <div class="card"><div class="title">Historique</div><p>✅ ✅ ❌ ✅ ✅</p></div>
+    <button class="btn primary">Modifier</button>
+  </section>
+
+  <section id="reminder" class="screen center" style="background:linear-gradient(180deg,#9a58c6,#d89bdc);color:white">
+    <div class="logo">🔔</div>
+    <h1>Il est 20h00</h1>
+    <p style="color:white">C'est l'heure de prendre ton traitement.</p>
+    <div class="card" style="color:var(--text);width:100%">
+      <div class="title">Doliprane 500 mg</div>
+      <div class="meta">1 comprimé</div>
+    </div>
+    <button class="btn success" onclick="show('home');toggleNav(true)">Oui, je l'ai pris</button>
+    <button class="btn warning" onclick="show('home');toggleNav(true)">Plus tard</button>
+    <button class="btn danger" onclick="show('home');toggleNav(true)">Je l'ai oublié</button>
+  </section>
+
+  <section id="documents" class="screen">
+    <div class="topbar"><h1>Mes documents</h1><div class="avatar">＋</div></div>
+    <div class="card"><div class="card-row"><div class="icon">📄</div><div><div class="title">Ordonnance</div><div class="meta">Dr Martin · 15 août 2026</div></div></div></div>
+    <div class="card"><div class="card-row"><div class="icon">🩸</div><div><div class="title">Prise de sang</div><div class="meta">Laboratoire Bio · 10 août 2026</div></div></div></div>
+    <div class="card"><div class="card-row"><div class="icon">📝</div><div><div class="title">Compte-rendu</div><div class="meta">Dr Martin · 2 août 2026</div></div></div></div>
+    <button class="btn primary" onclick="show('scanner');toggleNav(false)">Scanner un document</button>
+  </section>
+
+  <section id="profile" class="screen">
+    <h1>Mon profil</h1>
+    <div class="card"><div class="title">Sophie</div><p>Mon espace santé personnel</p></div>
+    <div class="card"><div class="title">🔔 Notifications</div></div>
+    <div class="card"><div class="title">🔒 Confidentialité</div></div>
+    <div class="card"><div class="title">⚙️ Réglages</div></div>
+  </section>
+
+  <nav id="nav" class="nav">
+    <button onclick="goNav('home',this)" class="active"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="m3 11 9-8 9 8v10h-6v-6H9v6H3z"/></svg><span>Accueil</span></button>
+    <button onclick="goNav('treatments',this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg><span>Santé</span></button>
+    <button class="scan" onclick="show('scanner');toggleNav(false)" aria-label="Scanner"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M4 8V5h3M17 5h3v3M20 16v3h-3M7 19H4v-3"/><rect x="7" y="8" width="10" height="8" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg></button>
+    <button onclick="goNav('documents',this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M6 2h8l4 4v16H6z"/><path d="M14 2v5h5"/></svg><span>Documents</span></button>
+    <button onclick="goNav('profile',this)"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Profil</span></button>
+  </nav>
 </div>
-<nav class="nav" id="nav" style="display:none"><button onclick="go('home')">🏠<br>Accueil</button><button onclick="go('health')">❤️<br>Santé</button><button class="scan" onclick="go('scan')">📷</button><button onclick="go('documents')">📂<br>Documents</button><button onclick="go('profile')">👤<br>Profil</button></nav>
 <script>
-const K='nymia_real_v1';
-let data=JSON.parse(localStorage.getItem(K)||'null')||{
- treatments:[{id:1,name:'Doliprane 500 mg',dose:'1 comprimé',times:['Matin','Midi','Soir']}],
- appointments:[{id:1,title:'Consultation gynécologue',doctor:'Dr Martin',date:'2026-08-28',time:'10:30',place:'Paris'}],
- documents:[{id:1,title:'Ordonnance Dr Martin',date:'2026-08-15'}], history:[]
-};
-function save(){localStorage.setItem(K,JSON.stringify(data));render()}
-function today(){return new Date().toISOString().slice(0,10)}
-function go(id){document.querySelectorAll('.screen').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.getElementById('nav').style.display=id==='welcome'?'none':'flex';render();scrollTo(0,0)}
-function render(){
- document.getElementById('count').textContent=data.history.filter(x=>x.date===today()&&x.status==='Pris').length+' prise(s) validée(s)';
- document.getElementById('homeTreatments').innerHTML=data.treatments.slice(0,2).map(t=>card('💊',t.name,t.dose)).join('');
- document.getElementById('homeAppointments').innerHTML=data.appointments.slice(0,1).map(a=>card('📅',a.title,(a.date||'')+' '+(a.time||''))).join('');
- document.getElementById('treatments').innerHTML=data.treatments.map(t=>`<div class="card"><div class="title">${t.name}</div><div class="small">${t.dose}</div>${t.times.map(tm=>{let h=data.history.find(x=>x.date===today()&&x.treatmentId===t.id&&x.time===tm);return `<div class="take ${h?'done':''}"><span>${tm}</span><button onclick="take(${t.id},'${tm}')">${h?'✓ Pris':'Pris'}</button></div>`}).join('')}</div>`).join('');
- document.getElementById('appointmentsList').innerHTML=data.appointments.map(a=>card('📅',a.title,(a.doctor||'')+' · '+(a.date||'')+' '+(a.time||''))).join('');
- document.getElementById('documentsList').innerHTML=data.documents.map(d=>card('📄',d.title,d.date||'')).join('');
- document.getElementById('historyList').innerHTML=data.history.length?data.history.slice().reverse().map(h=>card('✅',h.name,h.date+' · '+h.time+' · '+h.status)).join(''):'<p class="muted">Aucune prise enregistrée.</p>';
+function show(id){
+  if(id==='home') localStorage.setItem('nymiaOnboarded','1');
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
 }
-function card(i,t,s){return `<div class="card"><div class="row"><div class="icon">${i}</div><div><div class="title">${t}</div><div class="small">${s}</div></div></div></div>`}
-function take(id,time){let t=data.treatments.find(x=>x.id===id);data.history=data.history.filter(x=>!(x.date===today()&&x.treatmentId===id&&x.time===time));data.history.push({date:today(),treatmentId:id,time,status:'Pris',name:t.name});save()}
-function addTreatment(){let n=tName.value.trim();if(!n)return alert('Ajoute un nom.');data.treatments.push({id:Date.now(),name:n,dose:tDose.value||'À préciser',times:tTimes.value.split(',').map(x=>x.trim()).filter(Boolean)});save();go('health')}
-function addAppointment(){if(!aTitle.value.trim())return alert('Ajoute un motif.');data.appointments.push({id:Date.now(),title:aTitle.value,doctor:aDoctor.value,date:aDate.value,time:aTime.value,place:aPlace.value});save();go('appointments')}
-function saveScan(){data.documents.push({id:Date.now(),title:'Ordonnance scannée',date:today()});data.treatments.push({id:Date.now()+1,name:'Médicament détecté',dose:'1 comprimé',times:['Matin','Soir']});save();alert('Document et traitement sauvegardés.');go('home')}
-function resetAll(){if(confirm('Supprimer toutes les données de test ?')){localStorage.removeItem(K);location.reload()}}
-render();
-if('serviceWorker' in navigator)navigator.serviceWorker.register('./service-worker.js');
+function toggleNav(on){document.getElementById('nav').classList.toggle('show',on)}
+function goNav(id,btn){
+  show(id); toggleNav(true);
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+if(localStorage.getItem('nymiaOnboarded')==='1'){ show('home'); toggleNav(true); }
 </script>
-</body></html>
+</body>
+</html>
