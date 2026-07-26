@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#fbf8fc">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Nymia">
+  <link rel="manifest" href="./manifest.webmanifest?v=4">
+  <link rel="apple-touch-icon" href="./icon-180.png?v=4">
+  <link rel="icon" href="./icon-192.png?v=4">
+  <link rel="stylesheet" href="./style.css?v=4">
+  <title>Nymia</title>
+</head>
+<body>
+  <main class="app-shell">
+    <section id="home" class="screen active" aria-label="Accueil">
+      <header class="header">
+        <div class="brand-row">
+          <img class="brand-icon" src="./icon-192.png?v=4" alt="Nymia">
+          <div>
+            <h1>Bonjour <span>Sophie</span></h1>
+            <p>Tout est sous contrôle aujourd’hui.</p>
+          </div>
+        </div>
+        <button class="icon-button" aria-label="Notifications" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
+        </button>
+      </header>
+
+      <section class="scan-hero" aria-label="Scanner un document">
+        <button id="openScanner" class="scan-button" type="button">
+          <svg viewBox="0 0 64 64" aria-hidden="true">
+            <path d="M14 23v-7a4 4 0 0 1 4-4h7M39 12h7a4 4 0 0 1 4 4v7M50 41v7a4 4 0 0 1-4 4h-7M25 52h-7a4 4 0 0 1-4-4v-7"/>
+            <path d="m22 28 3-5h14l3 5h4a4 4 0 0 1 4 4v11a4 4 0 0 1-4 4H18a4 4 0 0 1-4-4V32a4 4 0 0 1 4-4z"/>
+            <circle cx="32" cy="37" r="8"/>
+          </svg>
+          <strong>Scanner</strong>
+          <small>Ordonnance, analyse,<br>compte rendu…</small>
+        </button>
+        <div class="scan-hint">↑&nbsp; Touchez pour commencer</div>
+      </section>
+
+      <section class="colibri-card">
+        <div class="colibri-head">
+          <img src="./icon-192.png?v=4" alt="" class="colibri-icon">
+          <div>
+            <div class="colibri-title">Colibri <span>IA</span></div>
+            <p><strong>Bonjour Sophie,</strong><br>Aujourd’hui, tout est à jour.</p>
+          </div>
+        </div>
+        <div class="quick-status">
+          <div><b class="status ok">✓</b><span>Aucun médicament<br>avant 20h00</span></div>
+          <div><b class="status purple">▣</b><span>Prochain RDV<br>demain à 10h30</span></div>
+          <div><b class="status cyan">▤</b><span>1 document<br>à classer</span></div>
+        </div>
+        <button class="outline-pill" data-target="appointments" type="button">Voir mon agenda ›</button>
+      </section>
+
+      <div class="section-title"><h2>Aujourd’hui</h2><button type="button">Tout voir ›</button></div>
+      <section class="timeline-card">
+        <article>
+          <div class="event-icon pill">◒</div>
+          <time>20h00</time>
+          <div><h3>Doliprane 500 mg</h3><p>1 comprimé</p></div>
+          <span>›</span>
+        </article>
+        <article data-target="appointments">
+          <div class="event-icon calendar">▣</div>
+          <time class="teal">Demain<br><small>10h30</small></time>
+          <div><h3>Consultation gynécologue</h3><p>Dr Martin</p></div>
+          <span>›</span>
+        </article>
+        <article>
+          <div class="event-icon document">▤</div>
+          <time class="coral">12 sept.</time>
+          <div><h3>Prise de sang</h3><p>Laboratoire BioSanté</p></div>
+          <span>›</span>
+        </article>
+      </section>
+
+      <div class="section-title"><h2>Documents récents</h2><button data-target="documents" type="button">Tout voir ›</button></div>
+      <section class="recent-grid">
+        <article><div class="event-icon pill">▤</div><div><h3>Ordonnance</h3><p>Dr Martin · 15 août</p></div></article>
+        <article><div class="event-icon calendar">⌁</div><div><h3>Analyse sanguine</h3><p>BioSanté · 10 août</p></div></article>
+      </section>
+    </section>
+
+    <section id="health" class="screen secondary-screen">
+      <h1>Ma santé</h1>
+      <div class="panel"><h2>Mes traitements</h2><p>1 traitement en cours</p></div>
+      <div class="panel"><h2>Mon suivi</h2><p>Tout est à jour</p></div>
+    </section>
+
+    <section id="scanner" class="screen scanner-screen">
+      <header><button id="closeScanner" type="button">×</button><span>Placez le document dans le cadre</span><button type="button">⚡</button></header>
+      <div class="document-frame"><strong>Dr Martin</strong><small>Paris, le 15/08/2026</small><h2>Ordonnance</h2><p>Doliprane 500 mg<br>1 comprimé, 3 fois par jour</p><p>Prise de sang<br>Bilan biologique complet</p></div>
+      <button id="takePhoto" class="shutter" type="button" aria-label="Prendre la photo"></button>
+    </section>
+
+    <section id="documents" class="screen secondary-screen">
+      <h1>Mes documents</h1>
+      <div class="panel"><h2>Ordonnance</h2><p>Dr Martin · 15 août 2026</p></div>
+      <div class="panel"><h2>Analyse sanguine</h2><p>BioSanté · 10 août 2026</p></div>
+      <div class="panel"><h2>Compte rendu</h2><p>2 août 2026</p></div>
+    </section>
+
+    <section id="appointments" class="screen secondary-screen">
+      <button class="back" data-target="home" type="button">← Retour</button>
+      <h1>Mes rendez-vous</h1>
+      <div class="panel"><h2>Consultation gynécologue</h2><p>Demain · 10h30<br>Dr Martin</p><button class="outline-pill" type="button">Préparer mes questions</button></div>
+    </section>
+
+    <section id="profile" class="screen secondary-screen">
+      <h1>Mon profil</h1>
+      <div class="panel"><h2>Sophie</h2><p>Mon espace santé personnel</p></div>
+      <div class="panel">Notifications</div>
+      <div class="panel">Confidentialité</div>
+      <div class="panel">Réglages</div>
+    </section>
+
+    <nav id="bottomNav" class="bottom-nav" aria-label="Navigation principale">
+      <button class="active" data-target="home" type="button"><span>⌂</span>Accueil</button>
+      <button data-target="health" type="button"><span>♡</span>Santé</button>
+      <button id="navScanner" class="nav-scan" type="button" aria-label="Scanner">⌾</button>
+      <button data-target="documents" type="button"><span>▤</span>Documents</button>
+      <button data-target="profile" type="button"><span>♙</span>Profil</button>
+    </nav>
+  </main>
+  <script src="./app.js?v=4" defer></script>
+</body>
+</html>
