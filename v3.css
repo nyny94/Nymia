@@ -4,3 +4,48 @@
 /* Page Ma Santé — maquette validée */
 .health-dashboard{padding:calc(28px + env(safe-area-inset-top)) 27px 35px}.health-title{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.health-title h2{font-size:31px;margin:0 0 6px;letter-spacing:-.6px}.health-title h2 span{font-size:28px}.health-title p{margin:0;color:#625d72;font-size:15px}.health-tools{display:flex;gap:10px}.health-tools button{height:48px;border:1px solid #e9e2ee;background:#fff;border-radius:24px;color:#8b42d0;font-weight:750}.health-tools button:first-child{width:48px;font-size:28px;color:#17132f}.health-tools button:last-child{padding:0 17px}.health-section-title{display:flex;justify-content:space-between;align-items:center;margin:27px 0 13px}.health-section-title h3{margin:0;font-size:13px;letter-spacing:.25px}.health-section-title button{border:0;background:transparent;color:#8d3bd0;font-weight:750}.health-shortcuts{display:grid;grid-template-columns:repeat(7,1fr);gap:13px}.health-shortcut{border:0;background:transparent;padding:0;color:#17142d;min-width:0}.health-shortcut>span{display:grid;place-items:center;width:100%;aspect-ratio:1;border-radius:20px;font-size:29px;border:1px solid rgba(120,90,150,.05)}.health-shortcut>b{display:block;font-size:11px;margin-top:8px;line-height:1.15}.health-shortcut .pink,.health-summary.violet{background:#fff0f7;color:#ec3f91}.health-shortcut .purple{background:#f3edff;color:#7844dd}.health-shortcut .blue,.health-summary.blue{background:#edf4ff;color:#2d83df}.health-shortcut .green,.health-summary.green{background:#eef9f1;color:#26a85f}.health-shortcut .orange,.health-summary.orange{background:#fff4eb;color:#f07b19}.health-shortcut .cyan{background:#ecf8fc;color:#2da9d2}.health-shortcut .rose{background:#fff0f6;color:#dc3983}.health-appointment{display:grid;grid-template-columns:92px 1fr auto;align-items:center;gap:18px;border:1px solid #eadcf5;background:linear-gradient(100deg,#fffaff,#f8f0ff);border-radius:20px;padding:18px 20px;min-height:122px}.appointment-icon{width:78px;height:78px;border-radius:50%;display:grid;place-items:center;background:#f0e2fc;font-size:32px}.appointment-copy{border-left:1px solid #dac4ec;padding-left:25px}.appointment-copy>b{color:#903ed0}.appointment-copy h3{font-size:20px;margin:5px 0}.appointment-copy p{margin:0;color:#49445a}.health-appointment>button{border:1px solid #a861dc;background:#fff;border-radius:22px;padding:11px 19px;color:#8d3fc6;font-weight:700}.health-summaries{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.health-summary{border:1px solid #e7dfec;border-radius:19px;padding:16px;text-align:left;min-height:180px;background:#fff!important;color:#261d37!important;box-shadow:0 8px 22px rgba(54,31,75,.04)}.health-summary>span{font-size:24px}.health-summary strong,.health-summary b,.health-summary small{display:block}.health-summary strong{font-size:28px;margin-top:15px}.health-summary b{font-size:14px}.health-summary small{font-size:12px;color:#696173;margin-top:2px}.health-summary svg{width:100%;height:28px;margin-top:14px}.health-summary polyline{fill:none;stroke:currentColor;stroke-width:2}.health-summary.violet svg{color:#9c42d9}.health-summary.blue svg{color:#338ee5}.health-summary.green svg{color:#36b96e}.health-summary.orange svg{color:#f08024}.treatment-panel{border:1px solid #e8e2ec;border-radius:20px;overflow:hidden}.treatment-row{width:100%;border:0;border-bottom:1px solid #eee9f1;background:#fff;display:grid;grid-template-columns:52px 1fr 145px 18px;align-items:center;gap:12px;padding:12px 17px;text-align:left;color:#19152f}.treatment-med{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:#f2e9fb;font-size:22px}.treatment-med.green{background:#edf9f1}.treatment-med.orange{background:#fff3e9}.treatment-row h4{margin:0 0 4px;font-size:15px}.treatment-row p{margin:0;color:#656072;font-size:12px}.next-dose small,.next-dose b{display:block}.next-dose small{color:#777181;font-size:11px}.next-dose b{color:#943fd1;font-size:12px;margin-top:4px}.treatment-row i{font-size:24px;color:#85808e}.manage-treatment{width:calc(100% - 28px);margin:14px;border:1px solid #e3cfef;background:#fbf5ff;border-radius:15px;padding:13px 16px;text-align:left;color:#8e3dcc;font-weight:700}.manage-treatment b{float:right;font-size:21px}.treatment-empty{display:grid;grid-template-columns:45px 1fr auto;align-items:center;gap:12px;padding:18px}.treatment-empty>span{font-size:27px}.treatment-empty p{margin:4px 0 0;color:#716a79;font-size:12px}.treatment-empty button{border:0;border-radius:14px;background:#eee2fb;color:#7637b3;padding:10px 14px}.empty-appointment{grid-template-columns:92px 1fr auto}
 @media(max-width:600px){.health-dashboard{padding:24px 18px 35px}.health-title{align-items:flex-start}.health-title h2{font-size:29px}.health-title p{font-size:13px}.health-tools button:last-child span{display:none}.health-tools button:last-child{width:48px;padding:0}.health-shortcuts{gap:7px;overflow-x:auto;padding-bottom:5px}.health-shortcut{min-width:58px}.health-shortcut>span{border-radius:17px;font-size:24px}.health-shortcut>b{font-size:10px}.health-appointment{grid-template-columns:65px 1fr;padding:15px;gap:11px}.appointment-icon{width:60px;height:60px}.appointment-copy{padding-left:13px}.health-appointment>button{grid-column:2;width:max-content}.health-summaries{grid-template-columns:repeat(2,1fr)}.health-summary{min-height:165px}.treatment-row{grid-template-columns:45px 1fr 14px;padding:12px}.treatment-med{width:42px;height:42px}.next-dose{grid-column:2}.treatment-row>i{grid-column:3;grid-row:1/3}.empty-appointment{grid-template-columns:65px 1fr}.empty-appointment>button{grid-column:2}}
+
+/* Ajustement mobile premium fidèle à la maquette */
+@media(max-width:600px){
+  .health-dashboard{padding:18px 18px 30px}
+  .health-title{align-items:center;gap:10px}
+  .health-title h2{font-size:25px;letter-spacing:-.45px;margin-bottom:3px}
+  .health-title h2 span{font-size:20px}
+  .health-title p{font-size:11.5px;white-space:nowrap}
+  .health-tools{gap:7px}
+  .health-tools button,.health-tools button:first-child,.health-tools button:last-child{width:38px;height:38px;border-radius:19px;padding:0;font-size:18px;font-weight:500}
+  .health-section-title{margin:22px 0 10px}
+  .health-section-title h3{font-size:11px;letter-spacing:.18px}
+  .health-section-title button{font-size:11px;font-weight:650}
+  .health-shortcuts{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;overflow:visible;padding:0}
+  .health-shortcut{min-width:0}
+  .health-shortcut>span{width:100%;border-radius:14px;font-size:18px;box-shadow:0 5px 16px rgba(43,25,64,.035)}
+  .health-shortcut>b{font-size:7.5px;font-weight:650;line-height:1.12;margin-top:6px;letter-spacing:-.1px}
+  .health-appointment,.empty-appointment{grid-template-columns:54px minmax(0,1fr) 82px;gap:11px;min-height:90px;padding:12px 13px;border-radius:16px}
+  .appointment-icon{width:50px;height:50px;font-size:20px}
+  .appointment-copy{padding-left:12px}
+  .appointment-copy>b{font-size:11px}
+  .appointment-copy h3{font-size:14px;line-height:1.15;margin:3px 0}
+  .appointment-copy p{font-size:10.5px;line-height:1.25}
+  .health-appointment>button,.empty-appointment>button{grid-column:3;width:auto;min-width:0;padding:8px 9px;border-radius:17px;font-size:10px}
+  .health-summaries{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+  .health-summary{min-height:123px;border-radius:15px;padding:10px 9px;box-shadow:0 5px 16px rgba(45,25,66,.03)}
+  .health-summary>span{font-size:17px}
+  .health-summary strong{font-size:22px;margin-top:8px;line-height:1}
+  .health-summary b{font-size:9px;margin-top:3px}
+  .health-summary small{font-size:7.5px}
+  .health-summary svg{height:19px;margin-top:8px}
+  .treatment-panel{border-radius:16px}
+  .treatment-row{grid-template-columns:38px minmax(0,1fr) 100px 10px;gap:9px;padding:9px 12px}
+  .treatment-med{width:36px;height:36px;font-size:16px}
+  .treatment-row h4{font-size:11px;margin-bottom:2px}
+  .treatment-row p{font-size:8.5px}
+  .next-dose{grid-column:3}
+  .next-dose small{font-size:7.5px}
+  .next-dose b{font-size:8.5px;margin-top:2px}
+  .treatment-row>i{grid-column:4;grid-row:1;font-size:16px}
+  .manage-treatment{padding:10px 12px;font-size:9px;border-radius:12px}
+  .treatment-empty{padding:13px;font-size:11px}
+  .treatment-empty p{font-size:9px}
+  .treatment-empty button{font-size:9px;padding:8px 10px}
+}
