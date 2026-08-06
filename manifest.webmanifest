@@ -1,0 +1,14 @@
+{
+  "name":"Nymia — Mon espace santé",
+  "short_name":"Nymia",
+  "description":"Santé, bien-être, cycle et rappels dans un espace personnel.",
+  "start_url":"./index.html",
+  "scope":"./",
+  "display":"standalone",
+  "background_color":"#fbf9fd",
+  "theme_color":"#fbf9fd",
+  "icons":[
+    {"src":"icon-180.png","sizes":"180x180","type":"image/png"},
+    {"src":"icon-512.png","sizes":"512x512","type":"image/png"}
+  ]
+}
