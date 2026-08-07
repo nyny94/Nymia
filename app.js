@@ -248,6 +248,13 @@ function healthIcon(type) {
     overview: '<path d="M4 19V9M10 19V5M16 19v-7M22 19V3"/>',
     search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
     reminder: '<path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/>',
+    sport: '<path d="m13 5 2-2 2 2-2 2ZM6 21l3-6 3 2 2 4M8 9l3 2 3-3 4 2M11 11l-2 4M4 12l4-3"/>',
+    nutrition: '<path d="M4 11h16a8 8 0 0 1-16 0ZM8 20h8M12 3v5M8 5l2 3M16 5l-2 3"/>',
+    meditation: '<circle cx="12" cy="5" r="2"/><path d="M12 8v5M8 10l4 3 4-3M5 19c2-4 5-5 7-3 2-2 5-1 7 3M3 21h18"/>',
+    sleep: '<path d="M20 15.5A8 8 0 1 1 8.5 4 6.5 6.5 0 0 0 20 15.5Z"/><path d="m18 4 .5 1.5L20 6l-1.5.5L18 8l-.5-1.5L16 6l1.5-.5Z"/>',
+    water: '<path d="M12 2S5 10 5 15a7 7 0 0 0 14 0c0-5-7-13-7-13Z"/>',
+    feminine: '<path d="M12 21c4-3 7-7 7-11a7 7 0 0 0-14 0c0 4 3 8 7 11Z"/><path d="M8 12c2 1 6 1 8 0M12 7v8"/>',
+    gratitude: '<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"/>',
   };
   return `<svg class="health-line-icon" viewBox="0 0 24 24" aria-hidden="true">${paths[type] || paths.symptom}</svg>`;
 }
@@ -300,37 +307,21 @@ function healthPage() {
   }<button class="manage-treatment" data-page="reminders">${healthIcon("reminder")} Gérer mes rappels de traitements <b>›</b></button></div></section>`;
 }
 function wellbeingPage() {
-  return `<section class="module-page"><div class="page-title"><div><h2>Bien-être</h2><p>Complète tes indicateurs du jour.</p></div></div><div class="mood-card"><h3>Comment te sens-tu ?</h3><div class="mood-picker">${[
-    ["😞", "Difficile"],
-    ["😐", "Moyen"],
-    ["🙂", "Bien"],
-    ["😄", "Très bien"],
-  ]
-    .map(
-      ([e, l]) =>
-        `<button data-mood="${e} ${l}" class="${state.metrics.mood === `${e} ${l}` ? "selected" : ""}"><span>${e}</span>${l}</button>`,
-    )
-    .join("")}</div></div><div class="wellbeing-list">${[
-    ["sleep", "🌙", "Sommeil", "7 h 30"],
-    ["water", "💧", "Hydratation", "1,8 L"],
-    ["activity", "🏃", "Activité", "6 200 pas"],
-  ]
-    .map(
-      ([id, ic, label]) =>
-        `<button class="wellbeing-row" data-metric="${id}"><span class="wellbeing-icon">${ic}</span><div><h3>${label}</h3><p>${esc(state.metrics[id] || "Aucune donnée")}</p></div><span class="wellbeing-cta">${state.metrics[id] ? "Modifier" : "Ajouter"} ›</span></button>`,
-    )
-    .join("")}</div><div class="history"><h3>Historique récent</h3>${
-    state.metricHistory.length
-      ? state.metricHistory
-          .slice(-7)
-          .reverse()
-          .map(
-            (h) =>
-              `<div><span>${fmtDate(h.date)}</span><b>${esc(h.label)} : ${esc(h.value)}</b></div>`,
-          )
-          .join("")
-      : '<p class="muted">Tes prochaines saisies apparaîtront ici.</p>'
-  }</div></section>`;
+  const quick = [
+    ["activity", "sport", "Sport", "mint"],
+    ["nutrition", "nutrition", "Nutrition", "peach"],
+    ["meditation", "meditation", "Méditation", "lilac"],
+    ["sleep", "sleep", "Sommeil", "pink"],
+    ["water", "water", "Hydratation", "blue"],
+    ["cycle", "feminine", "Bien-être féminin", "gold"],
+  ];
+  const today = [
+    ["activity", "sport", "ACTIVITÉ", state.metrics.activity || "6 200", "pas", 62, "mint"],
+    ["nutrition", "nutrition", "ALIMENTATION", "1 420", "kcal", 71, "peach"],
+    ["water", "water", "HYDRATATION", state.metrics.water || "1,6 L", "d’eau", 80, "blue"],
+    ["sleep", "sleep", "SOMMEIL", state.metrics.sleep || "7h30", "de sommeil", 94, "lilac"],
+  ];
+  return `<section class="wellness-dashboard"><header class="wellness-title"><div><h2>Bien-être <span>❧</span></h2><p>Prends soin de ton corps, de ton esprit et de ton énergie.</p></div><div class="health-tools"><button aria-label="Rechercher">${healthIcon("search")}</button><button data-page="wellbeing">${healthIcon("overview")}</button></div></header><div class="wellness-heading"><h3>ACCÈS RAPIDE</h3></div><div class="wellness-shortcuts">${quick.map(([id, icon, label, color]) => `<button class="wellness-shortcut" ${id === "cycle" ? 'data-page="cycle"' : id === "activity" || id === "sleep" || id === "water" ? `data-metric="${id}"` : `data-wellness="${id}"`}><span class="${color}">${healthIcon(icon)}</span><b>${label}</b></button>`).join("")}</div><article class="wellness-focus"><button class="focus-close" aria-label="Fermer">×</button><div class="wellness-focus-copy"><div class="wellness-focus-label">✦ &nbsp; FOCUS DU JOUR</div><h3>Respire, recentre-toi,<br>tu es au bon endroit.</h3><p>10 minutes pour toi aujourd’hui<br>peuvent tout changer.</p><button data-start-pause>▶ &nbsp; Commencer ma pause</button></div><div class="wellness-figure"><div class="figure-head"></div><div class="figure-body"></div><div class="figure-legs"></div><i></i><i></i><i></i></div></article><div class="wellness-section-head"><h3>AUJOURD’HUI</h3><button>Voir plus ›</button></div><div class="wellness-stats">${today.map(([id, icon, label, value, unit, percent, color]) => `<button class="wellness-stat ${color}" ${id === "nutrition" ? 'data-wellness="nutrition"' : `data-metric="${id}"`}><div class="wellness-stat-top"><span>${healthIcon(icon)}</span><small>${label}</small></div><strong>${esc(value)}</strong><b>${unit}</b><div class="wellness-progress"><i style="width:${percent}%"></i></div><p>${percent} % de l’objectif</p></button>`).join("")}</div><div class="wellness-section-head"><h3>PROGRAMMES SÉLECTIONNÉS</h3><button>Voir tout ›</button></div><div class="wellness-programs"><button class="wellness-program fitness"><span>Remise en forme<small>4 semaines</small></span><i>60 %</i><b>›</b></button><button class="wellness-program food"><span>Équilibre alimentaire<small>3 semaines</small></span><i>40 %</i><b>›</b></button><button class="wellness-program calm"><span>Gestion du stress<small>7 jours</small></span><i>20 %</i><b>›</b></button></div><div class="wellness-section-head"><h3>INSPIRATION DU JOUR</h3></div><div class="wellness-inspiration"><article><span>“</span><p>Tu n’as pas besoin d’être parfaite,<br>tu as juste besoin d’être constante.</p><i>❀</i></article><button data-gratitude>${healthIcon("gratitude")}<span><b>Journal de gratitude</b><small>3 choses positives aujourd’hui ?</small></span><strong>›</strong></button></div></section>`;
 }
 function cycleInfo() {
   if (!state.cycle.lastPeriod) return null;
@@ -468,6 +459,31 @@ function bindShell() {
   document
     .querySelector("[data-customize]")
     ?.addEventListener("click", openCustomize);
+  document.querySelectorAll("[data-wellness]").forEach(
+    (b) =>
+      (b.onclick = () =>
+        toast(
+          b.dataset.wellness === "nutrition"
+            ? "Le suivi nutrition arrive dans la prochaine étape"
+            : "Ce programme arrive dans la prochaine étape",
+        )),
+  );
+  document
+    .querySelector("[data-start-pause]")
+    ?.addEventListener("click", () =>
+      sheet(
+        "Ma pause",
+        '<div class="pause-card"><div class="pause-orb">10:00</div><h3>Respire doucement</h3><p>Inspire pendant 4 secondes, puis expire pendant 6 secondes.</p><button class="wide-primary" data-close-pause>Terminer ma pause</button></div>',
+      ),
+    );
+  document
+    .querySelector("[data-gratitude]")
+    ?.addEventListener("click", () =>
+      sheet(
+        "Journal de gratitude",
+        '<form id="gratitudeForm"><label>Mes 3 choses positives aujourd’hui</label><textarea name="gratitude" required placeholder="1. Une belle chose…\n2. Un petit plaisir…\n3. Une personne ou un moment…"></textarea><button class="save">Enregistrer</button></form>',
+      ),
+    );
   document
     .querySelector("[data-cycle-settings]")
     ?.addEventListener("click", openCycleSettings);
