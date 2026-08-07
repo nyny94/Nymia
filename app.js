@@ -31,7 +31,7 @@ const typeMeta = {
 const goalOptions = [
   ["health", "🩺", "Organiser ma santé"],
   ["wellbeing", "🌿", "Suivre mon bien-être"],
-  ["cycle", "🌸", "Suivre mon cycle"],
+  ["cycle", "📔", "Tenir mon carnet"],
   ["documents", "📄", "Centraliser mes documents"],
   ["reminders", "🔔", "Recevoir des rappels"],
 ];
@@ -228,7 +228,7 @@ function home() {
     })
     .join(
       "",
-    )}<button class="quick-action" data-page="cycle"><div class="iconbox">🌸</div><small>Cycle</small></button><button class="quick-action" data-page="reminders"><div class="iconbox">🔔</div><small>Rappel</small></button></div><div class="section-head"><h3>📈 MON ÉVOLUTION</h3><button data-page="wellbeing">Voir plus ›</button></div><div class="evolution-grid">${metric("sleep", "🌙 Sommeil", state.metrics.sleep || "Aucune donnée", "sleep")}${metric("water", "💧 Hydratation", state.metrics.water || "Aucune donnée", "water")}${metric("activity", "🏃 Activité", state.metrics.activity || "Aucune donnée", "activity")}</div></section>`;
+    )}<button class="quick-action" data-page="cycle"><div class="iconbox">📔</div><small>Mon Carnet</small></button><button class="quick-action" data-page="reminders"><div class="iconbox">🔔</div><small>Rappel</small></button></div><div class="section-head"><h3>📈 MON ÉVOLUTION</h3><button data-page="wellbeing">Voir plus ›</button></div><div class="evolution-grid">${metric("sleep", "🌙 Sommeil", state.metrics.sleep || "Aucune donnée", "sleep")}${metric("water", "💧 Hydratation", state.metrics.water || "Aucune donnée", "water")}${metric("activity", "🏃 Activité", state.metrics.activity || "Aucune donnée", "activity")}</div></section>`;
 }
 function itemRow(i) {
   return `<button class="today-row" data-item="${i.id}"><div class="time-pill">${esc(i.time || fmtDate(i.date, { day: "2-digit", month: "2-digit" }))}</div><div><b>${typeMeta[i.type][0]} ${esc(i.title)}</b><small>${esc(typeMeta[i.type][1])}${i.date ? " · " + fmtDate(i.date) : ""}</small></div><span>›</span></button>`;
@@ -335,17 +335,9 @@ function cycleInfo() {
 }
 function cyclePage() {
   const info = cycleInfo();
-  return `<section class="module-page"><div class="page-title"><div><h2>Mon cycle</h2><p>Des estimations personnelles, pas un diagnostic.</p></div></div>${info ? `<article class="cycle-hero"><div class="cycle-ring"><b>${info.delta >= 0 ? info.delta : "—"}</b><small>${info.delta === 1 ? "jour" : info.delta >= 0 ? "jours" : "cycle à mettre à jour"}</small></div><div><span>Prochaines règles estimées</span><h3>${fmtDate(info.next, { day: "numeric", month: "long", year: "numeric" })}</h3><p>Ovulation estimée : ${fmtDate(info.ovulation)}</p></div></article>` : `<article class="empty cycle-empty"><div>🌸</div><h3>Configure ton suivi</h3><p>Indique le premier jour de tes dernières règles pour obtenir une estimation.</p></article>`}<button class="wide-primary" data-cycle-settings>${info ? "Modifier mes informations" : "Configurer mon cycle"}</button><div class="cycle-grid"><article><span>Durée du cycle</span><b>${state.cycle.cycleLength} jours</b></article><article><span>Durée des règles</span><b>${state.cycle.periodLength} jours</b></article></div><div class="safety-note">ℹ️ Les dates sont indicatives. N’utilise pas ces estimations comme moyen de contraception.</div><div class="section-head"><h3>NOTES DU CYCLE</h3><button data-cycle-note>Ajouter ›</button></div>${
-    state.cycle.notes.length
-      ? `<div class="notes-list">${state.cycle.notes
-          .slice()
-          .reverse()
-          .map(
-            (n) => `<div><b>${fmtDate(n.date)}</b><p>${esc(n.text)}</p></div>`,
-          )
-          .join("")}</div>`
-      : '<div class="today-empty">Aucune note enregistrée</div>'
-  }</section>`;
+  const notes = state.cycle.notes.slice().reverse();
+  const cycleText = info && info.delta >= 0 ? `Règles dans ${info.delta} jour${info.delta > 1 ? "s" : ""}` : "Cycle à configurer";
+  return `<section class="journal-dashboard"><header class="journal-title"><div><h2>Mon Carnet <span>📔</span></h2><p>Ton espace d’évolution personnelle.<br><b>Nymia t’accompagne avec bienveillance, sans jugement.</b></p></div><div class="journal-tools"><button aria-label="Rechercher">⌕</button><button class="journal-add" data-cycle-note>+</button><small>Nouvelle note</small></div></header><article class="journal-summary"><div class="journal-bird"><h3>Ce que Colibri a remarqué<br>cette semaine ♡</h3><small>Cette semaine</small><img src="hummingbird.svg" alt="Colibri"></div><div class="journal-observations"><b>Cette semaine, on avance ensemble, à ton rythme.</b><p>💧 <strong>Hydratation à surveiller</strong><br>Ton corps a besoin de régularité.</p><p>☾ <strong>Sommeil et récupération</strong><br>Écoute ton énergie et accorde-toi du repos.</p><p>🍴 <strong>Repas plus équilibrés</strong><br>Rien de grave, on ajuste ensemble.</p><p>🌸 <strong>${cycleText}</strong><br>Pense à ton confort et à tes besoins.</p></div><div class="journal-kind"><span>♡</span><b>Tu n’as rien raté.</b><p>Chaque semaine est une nouvelle occasion de prendre soin de toi.</p><button>Voir le détail ›</button></div></article><article class="journal-next"><span>🪄</span><div><b>Pour la semaine prochaine</b><p>Petit pas par petit pas. On y va doucement, sans pression.</p></div><button data-page="wellbeing">◎ Mes objectifs ›</button></article><div class="journal-section"><h3>Mes sujets clés <small>ⓘ</small></h3><button>Tout voir ›</button></div><p class="journal-subtitle">Ce qui compte pour toi, analysé avec bienveillance.</p><div class="journal-topics">${[["♡","Santé","Prends soin de toi et repose-toi quand ton corps te le dit.","À surveiller","rose"],["🥗","Alimentation","Reviens doucement vers des repas simples et nourrissants.","À rééquilibrer","green"],["☾","Sommeil","Un coucher régulier sera ton meilleur allié.","À prendre en main","purple"],["👟","Activité","Même 10 min par jour peuvent faire la différence.","À relancer","blue"],["❀","Cycle",cycleText + ". Pense à ton confort.","À anticiper","orange"]].map(([ic,t,p,b,c])=>`<article class="${c}"><span>${ic}</span><b>${t}</b><p>${p}</p><em>${b}</em></article>`).join("")}</div><div class="journal-section"><h3>Mes trackers <small>— cette semaine</small></h3><button data-page="wellbeing">Voir le détail ›</button></div><div class="journal-trackers">${[["💧","Hydratation",state.metrics.water||"1,0 L / jour","Insuffisant","blue"],["🥗","Repas équilibrés","3 / 7 jours","À améliorer","green"],["☾","Sommeil",state.metrics.sleep||"5h45 / nuit","Trop faible","purple"],["🚶","Pas quotidiens",state.metrics.activity||"4 210 pas","En dessous","orange"],["❀","Bien-être","2 / 7 jours","Prends soin de toi","rose"]].map(([ic,t,v,s,c])=>`<button class="${c}" data-page="wellbeing"><span>${ic}</span><b>${t}</b><strong>${esc(v)}</strong><small>${s}</small><i></i></button>`).join("")}</div><div class="journal-bottom"><article><h3>Mes pistes pour aller mieux</h3><p>☾ <b>Me coucher 30 min plus tôt</b><small>Pour récupérer et améliorer mes nuits</small></p><p>💧 <b>Boire 1,5 L d’eau par jour</b><small>Commencer la journée avec un grand verre</small></p><p>🥗 <b>Préparer 3 repas maison simples</b><small>Équilibrés, rassasiants et bons pour moi</small></p></article><article><h3>Mes notes récentes <button data-cycle-note>Tout voir ›</button></h3>${notes.length ? notes.slice(0,3).map(n=>`<p class="journal-note"><span>♡</span><b>${fmtDate(n.date)}</b><small>${esc(n.text)}</small></p>`).join("") : `<div class="journal-empty"><span>♡</span><b>Ton carnet commence ici</b><p>Ajoute un moment, une pensée ou une petite victoire.</p><button data-cycle-note>Écrire ma première note</button></div>`}</article></div><button class="journal-cycle-settings" data-cycle-settings>🌸 ${info ? "Modifier les informations de mon cycle" : "Configurer le suivi de mon cycle"}</button></section>`;
 }
 function remindersPage() {
   const list = [...state.reminders].sort(
@@ -362,7 +354,7 @@ function colibriAnswer(q) {
   if (/rappel|notification/.test(s))
     return `Va dans « Rappels », puis appuie sur +. Tu peux choisir une date et une heure, puis autoriser les notifications.`;
   if (/cycle|règle|regle/.test(s))
-    return `Le module « Cycle » estime tes prochaines règles à partir de la dernière date et de la durée moyenne indiquées. Ces dates restent indicatives.`;
+    return `Dans « Mon Carnet », le suivi du cycle estime tes prochaines règles à partir de la dernière date et de la durée moyenne indiquées. Ces dates restent indicatives.`;
   if (/traitement|médicament|medicament/.test(s))
     return `Tu peux enregistrer un traitement depuis « Ma santé » ou le bouton +. Pour un conseil médical ou un effet indésirable, contacte un professionnel de santé ou un pharmacien.`;
   if (/sommeil|eau|hydratation|activité|activite/.test(s))
@@ -370,10 +362,11 @@ function colibriAnswer(q) {
   return `Je peux t’aider à utiliser Nymia, organiser tes rappels et retrouver tes suivis. Pour une question médicale personnelle, demande conseil à un professionnel de santé.`;
 }
 function colibriPage() {
-  return `<section class="module-page colibri-page"><div class="page-title"><div><h2>Colibri</h2><p>Ton guide dans Nymia.</p></div></div><div class="assistant-warning">Colibri ne remplace pas un médecin et ne pose pas de diagnostic.</div><div class="chat-list">${state.chat.length ? state.chat.map((m) => `<div class="chat-bubble ${m.role}">${esc(m.text)}</div>`).join("") : `<div class="empty"><div class="empty-icon"><img src="hummingbird.svg" alt=""></div><h3>Bonjour ${esc(state.profile.firstName || "")}</h3><p>Demande-moi comment utiliser Nymia.</p></div>`}</div><div class="suggestions">${["Créer un rappel", "Suivre mon cycle", "Ajouter un traitement"].map((q) => `<button data-suggestion="${q}">${q}</button>`).join("")}</div><div class="chat-compose"><input id="chatInput" placeholder="Écris ta question..."><button data-chat-send>Envoyer</button></div></section>`;
+  return `<section class="module-page colibri-page"><div class="page-title"><div><h2>Colibri</h2><p>Ton guide dans Nymia.</p></div></div><div class="assistant-warning">Colibri ne remplace pas un médecin et ne pose pas de diagnostic.</div><div class="chat-list">${state.chat.length ? state.chat.map((m) => `<div class="chat-bubble ${m.role}">${esc(m.text)}</div>`).join("") : `<div class="empty"><div class="empty-icon"><img src="hummingbird.svg" alt=""></div><h3>Bonjour ${esc(state.profile.firstName || "")}</h3><p>Demande-moi comment utiliser Nymia.</p></div>`}</div><div class="suggestions">${["Créer un rappel", "Ouvrir Mon Carnet", "Ajouter un traitement"].map((q) => `<button data-suggestion="${q}">${q}</button>`).join("")}</div><div class="chat-compose"><input id="chatInput" placeholder="Écris ta question..."><button data-chat-send>Envoyer</button></div></section>`;
 }
 function profilePage() {
-  return `<section class="module-page"><div class="profile-head"><div class="profile-large">${esc((state.profile.firstName || "N")[0].toUpperCase())}</div><h2>${esc(state.profile.firstName || "Mon profil")}</h2><p>${state.profile.birthDate ? "Née le " + fmtDate(state.profile.birthDate, { day: "numeric", month: "long", year: "numeric" }) : "Profil personnel Nymia"}</p></div><div class="settings"><button data-edit-profile><span>👤 Mes informations</span><b>›</b></button><button data-page="reminders"><span>🔔 Rappels et notifications</span><b>›</b></button><button data-page="cycle"><span>🌸 Paramètres du cycle</span><b>›</b></button><button data-export><span>📦 Exporter mes données</span><b>›</b></button><button data-about><span>ℹ️ À propos de Nymia</span><b>›</b></button><button data-reset class="danger"><span>Réinitialiser l’application</span><b>›</b></button></div><div class="privacy-card"><b>🔒 Tes données restent sur cet appareil</b><p>Nymia n’envoie pas tes informations personnelles vers un serveur.</p></div></section>`;
+  const name = esc(state.profile.firstName || "Nymia");
+  return `<section class="profile-dashboard"><header class="profile-title"><div><h2>Profil <span>🕊️</span></h2><p>Ton espace, tes réglages, ta confidentialité.</p></div><button data-page="reminders">♧<i></i></button></header><article class="profile-welcome"><div class="profile-photo"></div><div><h3>Bonjour, ${name} <span>♥</span></h3><p>Prendre soin de toi, chaque jour,<br>à ton rythme.</p><button data-edit-profile>✎ Modifier mon profil</button></div><blockquote>“<p>Chaque petit pas compte.<br>Tu es en chemin et tu fais déjà de belles choses.</p><small>♥ Colibri</small></blockquote></article><h3 class="profile-section-title">Mon compte</h3><div class="profile-account">${[["♙","Informations personnelles","Nom, âge, taille, poids, coordonnées…","edit-profile"],["◎","Mes objectifs","Mes objectifs santé, bien-être et personnels","wellbeing"],["♧","Notifications","Gérer les rappels, alertes et préférences","reminders"],["♙","Confidentialité","Données, partage, sécurité",""] ,["↥","Sauvegarde","Sauvegarder et restaurer mes données","export"],["⇩","Exporter mes données","Télécharger mes données personnelles","export"]].map(([ic,t,p,a])=>`<button ${a==="edit-profile"?'data-edit-profile':a==="export"?'data-export':a?`data-page="${a}"`:''}><span>${ic}</span><b>${t}</b><small>${p}</small><i>›</i></button>`).join("")}</div><h3 class="profile-section-title">Personnalisation</h3><article class="profile-custom"><button><span>☾</span><b>Thème</b><small>Clair</small><i>›</i></button><button><span>Aa</span><b>Taille du texte</b><small>Moyenne</small><i>›</i></button><button><span>♡</span><b>Couleurs</b><small>Lavande</small><i>›</i></button><button><span>☻</span><b>Langue</b><small>Français</small><i>›</i></button><div class="profile-notebook"></div></article><h3 class="profile-section-title">Support & à propos</h3><div class="profile-support"><div><button>ⓘ <span><b>Centre d’aide</b><small>FAQ, guides et articles</small></span><i>›</i></button><button>☵ <span><b>Nous contacter</b><small>Écris-nous, nous sommes là pour toi</small></span><i>›</i></button><button data-about>ⓘ <span><b>À propos de Nymia</b><small>Notre mission, nos valeurs</small></span><i>›</i></button><button>☆ <span><b>Noter l’application</b><small>Ton avis nous aide à nous améliorer</small></span><i>›</i></button></div><article><img src="hummingbird.svg" alt="Colibri"><p>Nymia <span>♥</span> :<br>ton alliée bienveillante<br>pour ta santé et ton bien-être.</p><small>Version 1.0.0</small></article></div><button class="profile-reset" data-reset>⇥ &nbsp; Se déconnecter</button></section>`;
 }
 function shellContent(page) {
   return page === "home"
@@ -392,18 +385,8 @@ function shellContent(page) {
 }
 function renderShell(page = "home") {
   currentPage = page;
-  app.innerHTML = `<div class="shell">${shellContent(page)}<button class="fab" data-open-add aria-label="Ajouter">+</button><nav>${[
-    ["home", "⌂", "Accueil"],
-    ["health", "♡", "Santé"],
-    ["wellbeing", "◡", "Bien-être"],
-    ["cycle", "🌸", "Cycle"],
-    ["profile", "♙", "Profil"],
-  ]
-    .map(
-      ([id, ic, l]) =>
-        `<button data-page="${id}" class="${id === page ? "active" : ""}">${ic}<small>${l}</small></button>`,
-    )
-    .join("")}</nav></div>`;
+  const navItem=(id,ic,label)=>`<button data-page="${id}" class="${id===page?"active":""}">${ic}<small>${label}</small></button>`;
+  app.innerHTML = `<div class="shell">${shellContent(page)}<button class="fab" data-open-add aria-label="Ajouter">+</button><nav>${navItem("home","⌂","Accueil")}${navItem("health","♡","Ma santé")}${navItem("wellbeing","◡","Bien-être")}<span class="nav-gap"></span>${navItem("colibri","🕊","Colibri")}${navItem("cycle","▣","Mon Carnet")}${navItem("profile","♙","Profil")}</nav></div>`;
   bindShell();
 }
 function bindShell() {
@@ -488,8 +471,8 @@ function bindShell() {
     .querySelector("[data-cycle-settings]")
     ?.addEventListener("click", openCycleSettings);
   document
-    .querySelector("[data-cycle-note]")
-    ?.addEventListener("click", openCycleNote);
+    .querySelectorAll("[data-cycle-note]")
+    .forEach((b) => b.addEventListener("click", openCycleNote));
   document
     .querySelector("[data-add-reminder]")
     ?.addEventListener("click", openReminder);
@@ -519,19 +502,19 @@ function bindShell() {
     .querySelector("[data-request-notification]")
     ?.addEventListener("click", requestNotifications);
   document
-    .querySelector("[data-edit-profile]")
-    ?.addEventListener("click", openProfileEdit);
+    .querySelectorAll("[data-edit-profile]")
+    .forEach((b) => b.addEventListener("click", openProfileEdit));
   document
-    .querySelector("[data-export]")
-    ?.addEventListener("click", exportData);
+    .querySelectorAll("[data-export]")
+    .forEach((b) => b.addEventListener("click", exportData));
   document
-    .querySelector("[data-about]")
-    ?.addEventListener("click", () =>
+    .querySelectorAll("[data-about]")
+    .forEach((b) => b.addEventListener("click", () =>
       sheet(
         "À propos",
         `<div class="detail-card"><h3>Nymia version 3</h3><p>Un espace personnel pour organiser santé, bien-être, cycle et rappels.</p><div class="safety-note">Nymia ne remplace jamais un professionnel de santé. En cas d’urgence, appelle le 15 ou le 112.</div></div>`,
       ),
-    );
+    ));
   document.querySelector("[data-reset]")?.addEventListener("click", () => {
     if (confirm("Effacer toutes les données de Nymia ?")) {
       localStorage.removeItem(STORAGE_KEY);
@@ -696,7 +679,7 @@ async function requestNotifications() {
 }
 function openCycleSettings() {
   const d = sheet(
-    "Paramètres du cycle",
+    "Suivi du cycle dans Mon Carnet",
     `<form><label>Premier jour des dernières règles</label><input name="lastPeriod" type="date" required value="${esc(state.cycle.lastPeriod)}"><div class="two-cols"><div><label>Cycle moyen</label><input name="cycleLength" type="number" min="15" max="60" value="${state.cycle.cycleLength}"></div><div><label>Durée des règles</label><input name="periodLength" type="number" min="1" max="15" value="${state.cycle.periodLength}"></div></div><button class="save">Enregistrer</button></form>`,
   );
   d.querySelector("form").onsubmit = (e) => {
@@ -708,7 +691,7 @@ function openCycleSettings() {
     save();
     d.remove();
     renderShell("cycle");
-    toast("Cycle mis à jour");
+    toast("Mon Carnet a été mis à jour");
   };
 }
 function openCycleNote() {
