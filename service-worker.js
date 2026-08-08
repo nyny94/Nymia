@@ -1,4 +1,4 @@
-const CACHE='nymia-v3-7';
+const CACHE='nymia-v3-8';
 const ASSETS=['./','./index.html','./style.css','./v3.css','./app.js','./manifest.webmanifest','./hummingbird.svg','./colibri-round.png','./icon-180.png','./icon-512.png','./wellbeing-reference.jpeg','./carnet-reference.jpeg','./profile-reference.jpeg'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim())));
