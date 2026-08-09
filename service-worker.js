@@ -1,4 +1,4 @@
-const CACHE = 'nymia-v3-11';
+const CACHE = 'nymia-v3-13';
 const ASSETS = ['./', './index.html', './style.css', './v3.css', './app.js', './manifest.webmanifest', './hummingbird.svg', './colibri-round.png', './icon-180.png', './icon-512.png'];
 
 self.addEventListener('install', event => event.waitUntil(

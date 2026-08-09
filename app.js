@@ -6,6 +6,9 @@ const defaultState = {
   items: [],
   metrics: { sleep: "", water: "", activity: "", mood: "" },
   metricHistory: [],
+  sleepLog: [],
+  waterLog: [],
+  activityLog: [],
   nutrition: [],
   gratitude: [],
   meditationHistory: [],
@@ -101,6 +104,31 @@ function daysBetween(a, b) {
   return Math.round(
     (new Date(b + "T12:00:00") - new Date(a + "T12:00:00")) / 86400000,
   );
+}
+const activityTypes = { walk: "Marche", run: "Course", bike: "Vélo", strength: "Musculation", other: "Autre" };
+function todayWaterMl() {
+  return state.waterLog.filter(w => w.date === todayISO()).reduce((s, w) => s + w.amountMl, 0);
+}
+function todaySleep() {
+  return state.sleepLog.filter(s => s.date === todayISO()).slice(-1)[0] || null;
+}
+function todayActivity() {
+  const today = state.activityLog.filter(a => a.date === todayISO());
+  return { minutes: today.reduce((s, a) => s + (a.minutes || 0), 0), steps: today.reduce((s, a) => s + (a.steps || 0), 0), count: today.length };
+}
+function waterDisplay() {
+  const ml = todayWaterMl();
+  return ml ? `${(ml / 1000).toLocaleString("fr-FR", { maximumFractionDigits: 2 })} L` : "";
+}
+function sleepDisplay() {
+  const s = todaySleep();
+  return s ? `${s.hours.toLocaleString("fr-FR")} h` : "";
+}
+function activityDisplay() {
+  const a = todayActivity();
+  if (a.steps) return `${a.steps.toLocaleString("fr-FR")} pas`;
+  if (a.minutes) return `${a.minutes} min`;
+  return "";
 }
 function progress() {
   return `<div class="progress">${[0, 1, 2, 3, 4].map((i) => `<span class="${i <= step ? "active" : ""}"></span>`).join("")}</div>`;
@@ -231,7 +259,7 @@ function home() {
     })
     .join(
       "",
-    )}</div><div class="section-head"><h3>📈 MON ÉVOLUTION</h3><button data-page="tracking">Voir le suivi ›</button></div><div class="evolution-grid">${metric("sleep", "🌙 Sommeil", state.metrics.sleep || "Aucune donnée", "sleep")}${metric("water", "💧 Hydratation", state.metrics.water || "Aucune donnée", "water")}${metric("activity", "🏃 Activité", state.metrics.activity || "Aucune donnée", "activity")}</div></section>`;
+    )}</div><div class="section-head"><h3>📈 MON ÉVOLUTION</h3><button data-page="tracking">Voir le suivi ›</button></div><div class="evolution-grid">${metric("sleep", "🌙 Sommeil", sleepDisplay() || "Aucune donnée", "sleep")}${metric("water", "💧 Hydratation", waterDisplay() || "Aucune donnée", "water")}${metric("activity", "🏃 Activité", activityDisplay() || "Aucune donnée", "activity")}</div></section>`;
 }
 function itemRow(i) {
   return `<button class="today-row" data-item="${i.id}"><div class="time-pill">${esc(i.time || fmtDate(i.date, { day: "2-digit", month: "2-digit" }))}</div><div><b>${typeMeta[i.type][0]} ${esc(i.title)}</b><small>${esc(typeMeta[i.type][1])}${i.date ? " · " + fmtDate(i.date) : ""}</small></div><span>›</span></button>`;
@@ -302,10 +330,10 @@ function wellbeingPage() {
   ];
   const hasNutrition=state.nutrition.length>0;
   const today = [
-    ["activity", "sport", "ACTIVITÉ", state.metrics.activity || "—", state.metrics.activity ? "pas" : "Aucune donnée", state.metrics.activity ? 55 : 0, "mint"],
+    ["activity", "sport", "ACTIVITÉ", activityDisplay() || "—", activityDisplay() ? "aujourd’hui" : "Aucune donnée", activityDisplay() ? 55 : 0, "mint"],
     ["nutrition", "nutrition", "ALIMENTATION", hasNutrition ? `${state.nutrition.length}` : "—", hasNutrition ? "repas enregistrés" : "Aucune donnée", hasNutrition ? Math.min(100,state.nutrition.length*20) : 0, "peach"],
-    ["water", "water", "HYDRATATION", state.metrics.water || "—", state.metrics.water ? "aujourd’hui" : "Aucune donnée", state.metrics.water ? 70 : 0, "blue"],
-    ["sleep", "sleep", "SOMMEIL", state.metrics.sleep || "—", state.metrics.sleep ? "la nuit dernière" : "Aucune donnée", state.metrics.sleep ? 75 : 0, "lilac"],
+    ["water", "water", "HYDRATATION", waterDisplay() || "—", waterDisplay() ? "aujourd’hui" : "Aucune donnée", waterDisplay() ? 70 : 0, "blue"],
+    ["sleep", "sleep", "SOMMEIL", sleepDisplay() || "—", sleepDisplay() ? "la nuit dernière" : "Aucune donnée", sleepDisplay() ? 75 : 0, "lilac"],
   ];
   return `<section class="wellness-dashboard"><header class="wellness-title"><div><h2>Bien-être <span>❧</span></h2><p>Prends soin de ton corps, de ton esprit et de ton énergie.</p></div><div class="health-tools"><button aria-label="Rechercher">${healthIcon("search")}</button><button data-page="tracking">${healthIcon("overview")}</button></div></header><div class="wellness-heading"><h3>MES OUTILS BIEN-ÊTRE</h3></div><div class="wellness-shortcuts">${quick.map(([id, icon, label, color]) => `<button class="wellness-shortcut" data-page="${id === "cycle" ? "cycle-detail" : id}"><span class="${color}">${healthIcon(icon)}</span><b>${label}</b></button>`).join("")}</div><article class="wellness-focus"><button class="focus-close" aria-label="Fermer">×</button><div class="wellness-focus-copy"><div class="wellness-focus-label">✦ &nbsp; FOCUS DU JOUR</div><h3>Respire, recentre-toi,<br>tu es au bon endroit.</h3><p>Choisis 1, 5 ou 10 minutes<br>pour une vraie pause guidée.</p><button data-page="meditation">▶ &nbsp; Choisir ma pause</button></div><div class="wellness-figure"><div class="figure-head"></div><div class="figure-body"></div><div class="figure-legs"></div><i></i><i></i><i></i></div></article><div class="wellness-section-head"><h3>MES DONNÉES DU JOUR</h3><button data-page="tracking">Voir tout ›</button></div><div class="wellness-stats">${today.map(([id, icon, label, value, unit, percent, color]) => `<button class="wellness-stat ${color}" data-page="${id}"><div class="wellness-stat-top"><span>${healthIcon(icon)}</span><small>${label}</small></div><strong>${esc(value)}</strong><b>${unit}</b><div class="wellness-progress"><i style="width:${percent}%"></i></div><p>${percent ? percent+" % de l’objectif" : "À renseigner"}</p></button>`).join("")}</div><div class="wellness-section-head"><h3>MES PROGRAMMES</h3><button data-page="programs">Voir tout ›</button></div><div class="wellness-programs"><button class="wellness-program fitness" data-program="fitness"><span>Remise en forme<small>4 semaines</small></span><i>Ouvrir</i><b>›</b></button><button class="wellness-program food" data-program="food"><span>Équilibre alimentaire<small>3 semaines</small></span><i>Ouvrir</i><b>›</b></button><button class="wellness-program calm" data-program="calm"><span>Gestion du stress<small>7 jours</small></span><i>Ouvrir</i><b>›</b></button></div><div class="wellness-section-head"><h3>MON JOURNAL POSITIF</h3></div><div class="wellness-inspiration"><article><span>“</span><p>${state.gratitude.length ? esc(state.gratitude[state.gratitude.length-1].text) : "Ajoute une pensée positive réellement vécue aujourd’hui."}</p><i>❀</i></article><button data-gratitude>${healthIcon("gratitude")}<span><b>Journal de gratitude</b><small>${state.gratitude.length} note${state.gratitude.length>1?"s":""} enregistrée${state.gratitude.length>1?"s":""}</small></span><strong>›</strong></button></div></section>`;
 }
@@ -332,9 +360,9 @@ function innerHeader(title, subtitle, back="home", closeLabel="Retour") {
 function journalPage(){
   const info=cycleInfo(),notes=state.cycle.notes.slice().reverse();
   const signals=[];
-  if(state.metrics.water) signals.push(["💧","Hydratation",state.metrics.water,"water"]);
-  if(state.metrics.sleep) signals.push(["☾","Sommeil",state.metrics.sleep,"sleep"]);
-  if(state.metrics.activity) signals.push(["👟","Activité",state.metrics.activity,"activity"]);
+  if(waterDisplay()) signals.push(["💧","Hydratation",waterDisplay(),"water"]);
+  if(sleepDisplay()) signals.push(["☾","Sommeil",sleepDisplay(),"sleep"]);
+  if(activityDisplay()) signals.push(["👟","Activité",activityDisplay(),"activity"]);
   if(state.nutrition.length) signals.push(["🥗","Nutrition",`${state.nutrition.length} repas enregistrés`,"nutrition"]);
   if(info) signals.push(["🌸","Cycle",info.delta>=0?`Règles estimées dans ${info.delta} jour${info.delta>1?"s":""}`:"Cycle à mettre à jour","cycle-detail"]);
   const hasData=signals.length||notes.length;
@@ -349,16 +377,28 @@ function documentsPage() {
   return `<section class="module-page functional-page">${innerHeader("Mes documents","Ordonnances, résultats et documents personnels.","health")}<button class="wide-primary" data-upload-document>+ Importer un document</button>${docs.length?`<div class="functional-list">${docs.map(d=>`<article class="file-row"><span>📄</span><div><b>${esc(d.title)}</b><small>${fmtDate(d.date)}${d.fileName?" · "+esc(d.fileName):""}</small></div>${d.fileData?`<button data-download-document="${d.id}">Télécharger</button>`:""}<button data-delete-document="${d.id}">×</button></article>`).join("")}</div>`:`<div class="empty"><div class="empty-icon">📁</div><h3>Aucun document</h3><p>Importe une photo ou un fichier PDF depuis ton téléphone.</p></div>`}<p class="storage-note">Les fichiers restent uniquement dans cette application sur cet appareil. Les fichiers volumineux peuvent dépasser la capacité de stockage du navigateur.</p></section>`;
 }
 function trackingPage() {
-  const rows=[["sleep","🌙","Sommeil"],["activity","👟","Pas et activité"],["water","💧","Hydratation"],["nutrition","🥗","Nutrition"]];
-  return `<section class="module-page functional-page">${innerHeader("Mon suivi quotidien","Des données réelles, jamais inventées.","wellbeing")}<div class="phone-limit"><b>Synchronisation iPhone</b><p>Cette version web ne peut pas lire Apple Santé automatiquement. Tu peux saisir tes valeurs ou les importer manuellement.</p></div><div class="tracking-list">${rows.map(([id,ic,l])=>`<button data-page="${id}"><span>${ic}</span><div><b>${l}</b><small>${id==="nutrition"?(state.nutrition.length?state.nutrition.length+" repas enregistrés":"Aucune donnée"):state.metrics[id]||"Aucune donnée"}</small></div><i>›</i></button>`).join("")}</div><div class="history"><h3>Historique récent</h3>${state.metricHistory.length?state.metricHistory.slice(-12).reverse().map(h=>`<div><b>${esc(h.label)}</b><span>${fmtDate(h.date)} · ${esc(h.value)}</span></div>`).join(""):`<p class="muted">Aucune donnée enregistrée.</p>`}</div></section>`;
+  const rows=[["sleep","🌙","Sommeil",sleepDisplay()],["activity","👟","Activité",activityDisplay()],["water","💧","Hydratation",waterDisplay()],["nutrition","🥗","Nutrition",state.nutrition.length?state.nutrition.length+" repas enregistrés":""]];
+  const recent=[
+    ...state.sleepLog.slice(-8).map(h=>({date:h.date,label:"Sommeil",value:`${h.hours} h · ${h.quality||""}`})),
+    ...state.waterLog.slice(-8).map(h=>({date:h.date,label:"Hydratation",value:`+${h.amountMl} mL`})),
+    ...state.activityLog.slice(-8).map(h=>({date:h.date,label:"Activité",value:`${activityTypes[h.type]||h.type}${h.minutes?` · ${h.minutes} min`:""}${h.steps?` · ${h.steps} pas`:""}`})),
+  ].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,12);
+  return `<section class="module-page functional-page">${innerHeader("Mon suivi quotidien","Des données réelles, jamais inventées.","wellbeing")}<div class="phone-limit"><b>Synchronisation iPhone</b><p>Cette version web ne peut pas lire Apple Santé automatiquement. Tu peux saisir tes valeurs ou les importer manuellement.</p></div><div class="tracking-list">${rows.map(([id,ic,l,val])=>`<button data-page="${id}"><span>${ic}</span><div><b>${l}</b><small>${val||"Aucune donnée"}</small></div><i>›</i></button>`).join("")}</div><div class="history"><h3>Historique récent</h3>${recent.length?recent.map(h=>`<div><b>${esc(h.label)}</b><span>${fmtDate(h.date)} · ${esc(h.value)}</span></div>`).join(""):`<p class="muted">Aucune donnée enregistrée.</p>`}</div></section>`;
 }
 function metricDetailPage(id) {
-  const cfg={sleep:["Sommeil","🌙","Heures dormies","ex. 7 h 30"],activity:["Pas et activité","👟","Nombre de pas","ex. 6 200 pas"],water:["Hydratation","💧","Eau consommée","ex. 1,5 L"]}[id];
-  const history=state.metricHistory.filter(h=>h.label===cfg[0] || (id==="activity"&&h.label==="Activité") || (id==="water"&&h.label==="Hydratation"));
-  return `<section class="module-page functional-page">${innerHeader(cfg[0],"Suis ton évolution avec tes propres données.","wellbeing")}<article class="data-hero"><span>${cfg[1]}</span><b>${esc(state.metrics[id]||"Aucune donnée")}</b><small>Dernière valeur enregistrée</small></article><button class="wide-primary" data-metric="${id}">+ Renseigner aujourd’hui</button>${id==="water"?`<button class="wide-secondary" data-hydration-reminder>${state.settings.hydrationAlerts?"Modifier mon rappel d’hydratation":"Créer un rappel d’hydratation"}</button>`:""}<div class="history"><h3>Historique</h3>${history.length?history.slice().reverse().map(h=>`<div><b>${fmtDate(h.date)}</b><span>${esc(h.value)}</span></div>`).join(""):`<p class="muted">Aucune mesure pour le moment.</p>`}</div></section>`;
+  const cfg={sleep:["Sommeil","🌙"],activity:["Activité","👟"],water:["Hydratation","💧"]}[id];
+  const log = id==="sleep"?state.sleepLog:id==="water"?state.waterLog:state.activityLog;
+  const today = id==="sleep"?todaySleep():id==="water"?null:todayActivity();
+  const display = id==="sleep"?sleepDisplay():id==="water"?waterDisplay():activityDisplay();
+  const rows = log.slice().reverse().slice(0,20).map(h=>{
+    if(id==="sleep") return `<div><b>${fmtDate(h.date)}</b><span>${h.hours} h · ${h.quality||""}${h.note?" · "+esc(h.note):""}</span></div>`;
+    if(id==="water") return `<div><b>${fmtDate(h.date)}</b><span>+${h.amountMl} mL</span></div>`;
+    return `<div><b>${fmtDate(h.date)}</b><span>${activityTypes[h.type]||h.type}${h.minutes?` · ${h.minutes} min`:""}${h.steps?` · ${h.steps} pas`:""}</span></div>`;
+  });
+  return `<section class="module-page functional-page">${innerHeader(cfg[0],"Suis ton évolution avec tes propres données.","wellbeing")}<article class="data-hero"><span>${cfg[1]}</span><b>${esc(display||"Aucune donnée")}</b><small>${id==="water"?"Total ajouté aujourd’hui":id==="activity"?"Cumul aujourd’hui":"Dernière nuit enregistrée"}</small></article><button class="wide-primary" data-metric="${id}">${id==="water"?"+ Ajouter de l’eau":id==="activity"?"+ Ajouter une activité":"+ Renseigner mon sommeil"}</button>${id==="water"?`<button class="wide-secondary" data-hydration-reminder>${state.settings.hydrationAlerts?"Modifier mon rappel d’hydratation":"Créer un rappel d’hydratation"}</button>`:""}<div class="history"><h3>Historique</h3>${rows.length?rows.join(""):`<p class="muted">Aucune mesure pour le moment.</p>`}</div></section>`;
 }
 function nutritionPage() {
-  return `<section class="module-page functional-page">${innerHeader("Nutrition","Enregistre ce que tu manges, sans jugement.","wellbeing")}<button class="wide-primary" data-add-meal>+ Ajouter un repas</button>${state.nutrition.length?`<div class="functional-list">${state.nutrition.slice().reverse().map(n=>`<article class="meal-row"><span>🥗</span><div><b>${esc(n.name)}</b><small>${fmtDate(n.date)} · ${esc(n.type)}</small><p>${esc(n.details||"")}</p></div><button data-delete-meal="${n.id}">×</button></article>`).join("")}</div>`:`<div class="empty"><div class="empty-icon">🥗</div><h3>Aucun repas enregistré</h3><p>Commence par ajouter un repas ou une collation.</p></div>`}</section>`;
+  return `<section class="module-page functional-page">${innerHeader("Nutrition","Enregistre ce que tu manges, sans jugement.","wellbeing")}<button class="wide-primary" data-add-meal>+ Ajouter un repas</button>${state.nutrition.length?`<div class="functional-list">${state.nutrition.slice().reverse().map(n=>`<article class="meal-row"><span>🥗</span><div><b>${esc(n.name)}</b><small>${fmtDate(n.date)} · ${esc(n.type)}${n.portion?" · "+esc(n.portion):""}${n.hunger?" · faim "+esc(n.hunger):""}</small><p>${esc(n.details||"")}</p></div><button data-delete-meal="${n.id}">×</button></article>`).join("")}</div>`:`<div class="empty"><div class="empty-icon">🥗</div><h3>Aucun repas enregistré</h3><p>Commence par ajouter un repas ou une collation.</p></div>`}</section>`;
 }
 function meditationPage() {
   return `<section class="module-page functional-page">${innerHeader("Méditation et respiration","Choisis une durée et lance un vrai compte à rebours.","wellbeing")}<div class="duration-grid">${[1,5,10].map(m=>`<button data-start-timer="${m}"><b>${m}</b><small>minute${m>1?"s":""}</small></button>`).join("")}</div><div class="history"><h3>Mes pauses terminées</h3>${state.meditationHistory.length?state.meditationHistory.slice().reverse().map(h=>`<div><b>${fmtDate(h.date)}</b><span>${h.minutes} min</span></div>`).join(""):`<p class="muted">Aucune pause terminée.</p>`}</div></section>`;
@@ -375,14 +415,51 @@ function healthOverviewPage(){const counts=Object.keys(typeMeta).map(id=>[typeMe
 function goalsPage(){const goals=[["sleep","Mieux dormir"],["water","Boire suffisamment"],["activity","Bouger davantage"],["nutrition","Mieux manger"],["cycle","Suivre mon cycle"],["health","Organiser ma santé"]];return `<section class="module-page functional-page">${innerHeader("Mes objectifs","Choisis ce qui compte vraiment pour toi.","profile")}<div class="goal-list">${goals.map(([id,l])=>`<label><input type="checkbox" data-profile-goal="${id}" ${state.profile.goals.includes(id)?"checked":""}><span>${l}</span></label>`).join("")}</div></section>`}
 function privacyPage(){return `<section class="module-page functional-page">${innerHeader("Confidentialité","Comprendre où restent tes informations.","profile")}<article class="privacy-detail"><h3>🔒 Stockage local</h3><p>Tes données sont enregistrées dans le navigateur de cet appareil. Nymia ne les envoie pas sur un serveur.</p><h3>Suppression</h3><p>Tu peux effacer toutes les données depuis le profil.</p><h3>Photo et documents</h3><p>Ils restent également sur cet appareil. Une désinstallation ou un nettoyage de Safari peut les supprimer : utilise la sauvegarde.</p></article></section>`}
 function backupPage(){return `<section class="module-page functional-page">${innerHeader("Sauvegarde","Créer une copie ou restaurer l’application.","profile")}<button class="wide-primary" data-export>Créer une sauvegarde</button><label class="import-backup">Restaurer une sauvegarde<input type="file" accept="application/json" data-import-backup></label><p class="storage-note">La sauvegarde contient tes données Nymia au format JSON. L’export simple sert à récupérer une copie ; la restauration réinjecte cette copie dans l’application.</p></section>`}
-function cycleDetailPage(){const info=cycleInfo();return `<section class="module-page functional-page">${innerHeader("Suivi du cycle","Un écran clair pour tes dates et symptômes.","cycle")}<article class="cycle-detail-hero"><span>🌸</span><div><small>Prochaines règles estimées</small><h3>${info?fmtDate(info.next,{day:"numeric",month:"long",year:"numeric"}):"Cycle non configuré"}</h3><p>${info?`${info.delta} jour${info.delta>1?"s":""} restant${info.delta>1?"s":""}`:"Ajoute le premier jour de tes dernières règles."}</p></div></article>${info?`<div class="data-hero" style="margin-bottom:16px"><span>${info.phase==="Règles"?"🩸":info.phase==="Fenêtre fertile estimée"?"🌸":"🌙"}</span><b>Jour ${info.dayInCycle} / ${info.cycleLength}</b><small>${esc(info.phase)}</small><div class="wellness-progress" style="margin-top:12px"><i style="width:${Math.min(100,Math.round(info.dayInCycle/info.cycleLength*100))}%"></i></div></div><div class="cycle-grid" style="margin-bottom:16px"><article><span>Fenêtre fertile estimée</span><b>${fmtDate(info.fertileStart,{day:"numeric",month:"short"})} → ${fmtDate(info.fertileEnd,{day:"numeric",month:"short"})}</b></article></div>`:""}<button class="wide-primary" data-cycle-settings>${info?"Modifier mes dates":"Configurer mon cycle"}</button><div class="cycle-grid"><article><span>Durée moyenne</span><b>${state.cycle.cycleLength} jours</b></article><article><span>Durée des règles</span><b>${state.cycle.periodLength} jours</b></article></div><div class="safety-note">Les estimations ne sont ni un diagnostic ni un moyen de contraception.</div><div class="section-head"><h3>JOURNAL DU CYCLE</h3><button data-cycle-note>Ajouter ›</button></div>${state.cycle.notes.length?`<div class="notes-list">${state.cycle.notes.slice().reverse().map(n=>`<div><b>${fmtDate(n.date)}</b><p>${esc(n.text)}</p></div>`).join("")}</div>`:`<div class="today-empty">Aucun symptôme ou ressenti enregistré.</div>`}</section>`}
+function cycleDayStatus(dateISO) {
+  if (!state.cycle.lastPeriod) return null;
+  const cycleLength = Number(state.cycle.cycleLength) || 28;
+  const periodLength = Number(state.cycle.periodLength) || 5;
+  const diff = daysBetween(state.cycle.lastPeriod, dateISO);
+  const mod = ((diff % cycleLength) + cycleLength) % cycleLength;
+  const ovIndex = Math.max(0, cycleLength - 15);
+  if (mod < periodLength) return "period";
+  if (mod >= ovIndex - 4 && mod <= ovIndex + 1) return "fertile";
+  return null;
+}
+function monthGrid(year, month) {
+  const first = new Date(year, month, 1);
+  const startOffset = (first.getDay() + 6) % 7;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const cells = [];
+  for (let i = 0; i < startOffset; i++) cells.push(null);
+  for (let d = 1; d <= daysInMonth; d++) cells.push(`${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`);
+  return cells;
+}
+function cycleCalendar() {
+  const today = new Date();
+  const notesSet = new Set(state.cycle.notes.map(n => n.date));
+  const renderMonth = (year, month) => {
+    const cells = monthGrid(year, month);
+    const label = new Intl.DateTimeFormat("fr-FR", { month: "long", year: "numeric" }).format(new Date(year, month, 1));
+    return `<div class="cycle-cal"><h4>${label.charAt(0).toUpperCase() + label.slice(1)}</h4><div class="cycle-cal-week">${["L","M","M","J","V","S","D"].map(d=>`<span>${d}</span>`).join("")}</div><div class="cycle-cal-grid">${cells.map(iso => {
+      if (!iso) return `<i></i>`;
+      const status = cycleDayStatus(iso);
+      const isToday = iso === todayISO();
+      const hasNote = notesSet.has(iso);
+      return `<button class="cal-day ${status||""} ${isToday?"is-today":""}" data-cal-day="${iso}">${Number(iso.slice(-2))}${hasNote?'<i class="dot"></i>':""}</button>`;
+    }).join("")}</div></div>`;
+  };
+  const next = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+  return `<div class="cycle-calendar"><div class="cycle-cal-legend"><span><i class="sw period"></i> Règles estimées</span><span><i class="sw fertile"></i> Fenêtre fertile</span><span><i class="sw note"></i> Note ajoutée</span></div><div class="cycle-cal-months">${renderMonth(today.getFullYear(), today.getMonth())}${renderMonth(next.getFullYear(), next.getMonth())}</div></div>`;
+}
+function cycleDetailPage(){const info=cycleInfo();return `<section class="module-page functional-page">${innerHeader("Suivi du cycle","Un écran clair pour tes dates et symptômes.","cycle")}<article class="cycle-detail-hero"><span>🌸</span><div><small>Prochaines règles estimées</small><h3>${info?fmtDate(info.next,{day:"numeric",month:"long",year:"numeric"}):"Cycle non configuré"}</h3><p>${info?`${info.delta} jour${info.delta>1?"s":""} restant${info.delta>1?"s":""}`:"Ajoute le premier jour de tes dernières règles."}</p></div></article>${info?`<div class="data-hero" style="margin-bottom:16px"><span>${info.phase==="Règles"?"🩸":info.phase==="Fenêtre fertile estimée"?"🌸":"🌙"}</span><b>Jour ${info.dayInCycle} / ${info.cycleLength}</b><small>${esc(info.phase)}</small><div class="wellness-progress" style="margin-top:12px"><i style="width:${Math.min(100,Math.round(info.dayInCycle/info.cycleLength*100))}%"></i></div></div><div class="cycle-grid" style="margin-bottom:16px"><article><span>Fenêtre fertile estimée</span><b>${fmtDate(info.fertileStart,{day:"numeric",month:"short"})} → ${fmtDate(info.fertileEnd,{day:"numeric",month:"short"})}</b></article></div>`:""}${state.cycle.lastPeriod?cycleCalendar():""}<button class="wide-primary" data-cycle-settings>${info?"Modifier mes dates":"Configurer mon cycle"}</button><div class="cycle-grid"><article><span>Durée moyenne</span><b>${state.cycle.cycleLength} jours</b></article><article><span>Durée des règles</span><b>${state.cycle.periodLength} jours</b></article></div><div class="safety-note">Les estimations ne sont ni un diagnostic ni un moyen de contraception.</div><div class="section-head"><h3>JOURNAL DU CYCLE</h3><button data-cycle-note>Ajouter ›</button></div>${state.cycle.notes.length?`<div class="notes-list">${state.cycle.notes.slice().reverse().map(n=>`<div><b>${fmtDate(n.date)}</b><p>${esc(n.text)}</p></div>`).join("")}</div>`:`<div class="today-empty">Aucun symptôme ou ressenti enregistré.</div>`}</section>`}
 function remindersPage() {
   const list = [...state.reminders].sort(
     (a, b) =>
       a.done - b.done ||
       `${a.date}${a.time}`.localeCompare(`${b.date}${b.time}`),
   );
-  return `<section class="module-page functional-page">${innerHeader("Mes notifications","Traitements, hydratation et tâches importantes.","home","Fermer")}<button class="page-add reminder-add" data-add-reminder>+</button><button class="hard-close" data-page="home" aria-label="Fermer">✕ Fermer</button><div class="reminder-tabs"><span>${list.filter((r) => !r.done).length} à faire</span><span>${list.filter((r) => r.done).length} terminé${list.filter((r) => r.done).length > 1 ? "s" : ""}</span></div>${list.length ? `<div class="reminder-list">${list.map((r) => `<article class="reminder-row ${r.done ? "done" : ""}"><button data-toggle-reminder="${r.id}" aria-label="Marquer comme fait">${r.done ? "✓" : ""}</button><div><h3>${esc(r.title)}</h3><p>${fmtDate(r.date)} · ${esc(r.time || "Sans heure")}</p></div><button data-delete-reminder="${r.id}" aria-label="Supprimer">×</button></article>`).join("")}</div>` : `<div class="empty"><div class="empty-icon">🔔</div><h3>Aucun rappel</h3><p>Ajoute un rappel pour un traitement ou l’hydratation.</p></div>`}<button class="wide-secondary" data-request-notification>${state.notificationChoice === "granted" ? "Notifications autorisées" : "Activer les notifications"}</button><p class="storage-note">${state.notificationChoice === "granted" ? "Une alerte se déclenche à l’heure prévue lorsque Nymia est ouverte ou revient au premier plan." : "Active les notifications pour recevoir une alerte au moment prévu."}</p></section>`;
+  return `<section class="module-page functional-page">${innerHeader("Mes notifications","Traitements, hydratation et tâches importantes.","home","Fermer")}<button class="page-add reminder-add" data-add-reminder>+</button><button class="hard-close" data-page="home" aria-label="Fermer">✕ Fermer</button><div class="reminder-tabs"><span>${list.filter((r) => !r.done).length} à faire</span><span>${list.filter((r) => r.done).length} terminé${list.filter((r) => r.done).length > 1 ? "s" : ""}</span></div>${list.length ? `<div class="reminder-list">${list.map((r) => `<article class="reminder-row ${r.done ? "done" : ""}"><button data-toggle-reminder="${r.id}" aria-label="Marquer comme fait">${r.done ? "✓" : ""}</button><div data-edit-reminder="${r.id}"><h3>${esc(r.title)}</h3><p>${fmtDate(r.date)} · ${esc(r.time || "Sans heure")}${r.recurring?" · se répète":""}</p></div><button data-delete-reminder="${r.id}" aria-label="Supprimer">×</button></article>`).join("")}</div>` : `<div class="empty"><div class="empty-icon">🔔</div><h3>Aucun rappel</h3><p>Ajoute un rappel pour un traitement ou l’hydratation.</p></div>`}<button class="wide-secondary" data-request-notification>${state.notificationChoice === "granted" ? "Notifications autorisées" : "Activer les notifications"}</button><p class="storage-note">${state.notificationChoice === "granted" ? "Une alerte se déclenche à l’heure prévue lorsque Nymia est ouverte ou revient au premier plan." : "Active les notifications pour recevoir une alerte au moment prévu."}</p></section>`;
 }
 function colibriAnswer(q) {
   const s = q.toLowerCase();
@@ -499,10 +576,20 @@ function bindShell() {
     ?.addEventListener("click", openCycleSettings);
   document
     .querySelectorAll("[data-cycle-note]")
-    .forEach((b) => b.addEventListener("click", openCycleNote));
+    .forEach((b) => b.addEventListener("click", () => openCycleNote()));
+  document
+    .querySelectorAll("[data-cal-day]")
+    .forEach((b) => (b.onclick = () => openCycleNote(b.dataset.calDay)));
   document
     .querySelector("[data-add-reminder]")
-    ?.addEventListener("click", openReminder);
+    ?.addEventListener("click", () => openReminder());
+  document.querySelectorAll("[data-edit-reminder]").forEach(
+    (b) =>
+      (b.onclick = () => {
+        const r = state.reminders.find((x) => x.id === Number(b.dataset.editReminder));
+        if (r) openReminder(r);
+      }),
+  );
   document.querySelectorAll("[data-toggle-reminder]").forEach(
     (b) =>
       (b.onclick = () => {
@@ -623,9 +710,9 @@ async function downloadDocument(id){
   toast("Ouvert dans un nouvel onglet : utilise le bouton Partager pour l’enregistrer");
 }
 function deleteDocument(id){if(!confirm("Supprimer ce document ?"))return;state.items=state.items.filter(i=>i.id!==id);save();renderShell("documents")}
-function openMealForm(){const d=sheet("Ajouter un repas",'<form><label>Type de repas</label><select name="type"><option>Petit-déjeuner</option><option>Déjeuner</option><option>Dîner</option><option>Collation</option></select><label>Ce que j’ai mangé</label><input name="name" required placeholder="Ex. Poulet, riz et légumes"><label>Note facultative</label><textarea name="details" placeholder="Faim, digestion, ressenti…"></textarea><button class="save">Enregistrer</button></form>');d.querySelector("form").onsubmit=e=>{e.preventDefault();const fd=new FormData(e.target);state.nutrition.push({id:Date.now(),date:todayISO(),type:fd.get("type"),name:fd.get("name").trim(),details:fd.get("details").trim()});save();d.remove();renderShell("nutrition");toast("Repas enregistré")}}
+function openMealForm(){const d=sheet("Ajouter un repas",'<form><label>Type de repas</label><select name="type"><option>Petit-déjeuner</option><option>Déjeuner</option><option>Dîner</option><option>Collation</option></select><label>Ce que j’ai mangé</label><input name="name" required placeholder="Ex. Poulet, riz et légumes"><div class="two-cols"><div><label>Portion (facultatif)</label><input name="portion" placeholder="ex. 1 assiette, 200 g"></div><div><label>Sensation de faim</label><select name="hunger"><option value="">—</option><option value="légère">Légère</option><option value="normale">Normale</option><option value="forte">Forte</option></select></div></div><label>Note facultative</label><textarea name="details" placeholder="Digestion, ressenti…"></textarea><button class="save">Enregistrer</button></form>');d.querySelector("form").onsubmit=e=>{e.preventDefault();const fd=new FormData(e.target);state.nutrition.push({id:Date.now(),date:todayISO(),type:fd.get("type"),name:fd.get("name").trim(),portion:fd.get("portion").trim(),hunger:fd.get("hunger"),details:fd.get("details").trim()});save();d.remove();renderShell("nutrition");toast("Repas enregistré")}}
 function openHydrationReminder(){const d=sheet("Rappel d’hydratation",'<form><label>Heure du rappel</label><input type="time" name="time" required value="10:00"><button class="save">Enregistrer</button></form>');d.querySelector("form").onsubmit=e=>{e.preventDefault();const time=new FormData(e.target).get("time");state.settings.hydrationAlerts=true;state.reminders.push({id:Date.now(),title:"Boire un verre d’eau",date:todayISO(),time,done:false});save();d.remove();renderShell("water");toast("Rappel d’hydratation créé")}}
-function createTreatmentReminders(){let added=0;state.items.filter(i=>i.type==="treatment").forEach((t,i)=>{const title=`Prendre ${t.title}`;if(!state.reminders.some(r=>r.title===title)){state.reminders.push({id:Date.now()+i,title,date:t.date||todayISO(),time:t.time||"08:00",done:false});added++}});save();renderShell("treatments");toast(added?`${added} rappel${added>1?"s":""} créé${added>1?"s":""}`:"Tous les rappels existent déjà")}
+function createTreatmentReminders(){let added=0;state.items.filter(i=>i.type==="treatment").forEach((t,i)=>{const title=`Prendre ${t.title}`;const times=t.times&&t.times.length?t.times:[t.time||"08:00"];times.forEach((time,j)=>{if(!state.reminders.some(r=>r.title===title&&r.time===time)){state.reminders.push({id:Date.now()+i*10+j,title,date:t.date||todayISO(),time,done:false,recurring:true,treatmentId:t.id,endDate:t.endDate||null});added++}})});save();renderShell("treatments");toast(added?`${added} rappel${added>1?"s":""} créé${added>1?"s":""}`:"Tous les rappels existent déjà")}
 function openProfilePhoto(){const input=document.createElement("input");input.type="file";input.accept="image/*";input.onchange=()=>{const file=input.files[0];if(!file)return;if(file.size>2500000)return toast("Choisis une photo de moins de 2,5 Mo");const reader=new FileReader();reader.onload=()=>{state.profile.photo=reader.result;try{save()}catch{return toast("Photo trop volumineuse")};renderShell("profile");toast("Photo mise à jour")};reader.readAsDataURL(file)};input.click()}
 function openPreference(pref){const options={theme:["Thème",[["light","Clair"],["dark","Sombre"]]],textSize:["Taille du texte",[["medium","Moyenne"],["large","Grande"]]],color:["Couleur principale",[["lavender","Lavande"],["rose","Rose"]]],language:["Langue",[["fr","Français"]]]}[pref];const d=sheet(options[0],`<div class="preference-list">${options[1].map(([v,l])=>`<button data-pref-value="${v}" class="${state.settings[pref]===v?"selected":""}">${l}</button>`).join("")}</div>`);d.querySelectorAll("[data-pref-value]").forEach(b=>b.onclick=()=>{state.settings[pref]=b.dataset.prefValue;save();d.remove();applyPreferences();renderShell("profile")})}
 function applyPreferences(){document.documentElement.dataset.theme=state.settings.theme;document.documentElement.dataset.color=state.settings.color;document.documentElement.style.fontSize=state.settings.textSize==="large"?"18px":"16px"}
@@ -656,24 +743,41 @@ function openAddMenu() {
 }
 function openForm(type, item = null) {
   const [, label] = typeMeta[type],
+    isTreatment = type === "treatment",
+    timesValue = item?.times ? item.times.join(", ") : (item?.time || "08:00"),
     d = sheet(
       `${item ? "Modifier" : "Ajouter"} : ${label}`,
-      `<form id="itemForm"><label>Titre</label><input name="title" required value="${esc(item?.title || "")}" placeholder="${label}"><div class="two-cols"><div><label>Date</label><input name="date" type="date" value="${esc(item?.date || todayISO())}"></div><div><label>Heure</label><input name="time" type="time" value="${esc(item?.time || (type==="treatment"?"08:00":""))}"></div></div><label>Détails</label><textarea name="details" placeholder="Informations facultatives">${esc(item?.details || "")}</textarea>${type==="treatment"?'<label class="check-line"><input type="checkbox" name="createReminder" checked> Créer aussi un rappel de prise</label>':""}<button class="save">Enregistrer</button></form>`,
+      `<form id="itemForm"><label>Titre</label><input name="title" required value="${esc(item?.title || "")}" placeholder="${label}"><div class="two-cols"><div><label>Date${isTreatment?" de début":""}</label><input name="date" type="date" value="${esc(item?.date || todayISO())}"></div>${isTreatment?`<div><label>Durée (jours)</label><input name="durationDays" type="number" min="1" max="365" placeholder="Continu" value="${esc(item?.durationDays||"")}"></div>`:`<div><label>Heure</label><input name="time" type="time" value="${esc(item?.time||"")}"></div>`}</div>${isTreatment?`<label>Heure(s) de prise</label><input name="times" value="${esc(timesValue)}" placeholder="ex. 08:00, 14:00, 20:00"><p class="storage-note" style="margin-top:6px">Sépare plusieurs heures par une virgule si tu dois le prendre plusieurs fois par jour.</p>`:""}<label>Détails</label><textarea name="details" placeholder="Informations facultatives">${esc(item?.details || "")}</textarea>${isTreatment?'<label class="check-line"><input type="checkbox" name="createReminder" checked> Créer aussi les rappels de prise</label>':""}<button class="save">Enregistrer</button></form>`,
     );
   d.querySelector("form").onsubmit = (e) => {
     e.preventDefault();
-    const fd = new FormData(e.target),
-      data = {
+    const fd = new FormData(e.target);
+    let times = [];
+    if (isTreatment) {
+      times = (fd.get("times") || "08:00").split(",").map(t => t.trim()).filter(t => /^\d{1,2}:\d{2}$/.test(t));
+      if (!times.length) times = ["08:00"];
+    }
+    const data = {
         id: item?.id || Date.now(),
         type,
         title: fd.get("title").trim(),
         date: fd.get("date"),
-        time: fd.get("time"),
+        time: isTreatment ? times[0] : fd.get("time"),
         details: fd.get("details"),
       };
+    if (isTreatment) {
+      data.times = times;
+      const durationDays = Number(fd.get("durationDays")) || null;
+      data.durationDays = durationDays;
+      data.endDate = durationDays ? addDays(data.date, durationDays - 1) : null;
+    }
     if (item) Object.assign(item, data);
     else state.items.push(data);
-    if(type==="treatment"&&fd.get("createReminder")&&!item) state.reminders.push({id:Date.now()+1,title:`Prendre ${data.title}`,date:data.date,time:data.time,done:false});
+    if (isTreatment && fd.get("createReminder") && !item) {
+      times.forEach((t, i) => {
+        state.reminders.push({ id: Date.now() + i + 1, title: `Prendre ${data.title}`, date: data.date, time: t, done: false, recurring: true, treatmentId: data.id, endDate: data.endDate });
+      });
+    }
     save();
     d.remove();
     renderShell(["health","agenda","treatments"].includes(currentPage) ? currentPage : "home");
@@ -686,7 +790,7 @@ function openItemDetail(id) {
   const [, label] = typeMeta[item.type],
     d = sheet(
       label,
-      `<div class="detail-card"><h3>${esc(item.title)}</h3><p><b>Date :</b> ${fmtDate(item.date, { day: "numeric", month: "long", year: "numeric" })}</p><p><b>Heure :</b> ${esc(item.time || "Non renseignée")}</p>${item.details ? `<p>${esc(item.details)}</p>` : ""}<div class="detail-actions"><button data-edit>Modifier</button><button class="delete" data-delete>Supprimer</button></div></div>`,
+      `<div class="detail-card"><h3>${esc(item.title)}</h3><p><b>Date${item.type==="treatment"?" de début":""} :</b> ${fmtDate(item.date, { day: "numeric", month: "long", year: "numeric" })}</p>${item.type==="treatment"?`<p><b>Heure(s) de prise :</b> ${esc((item.times||[item.time]).filter(Boolean).join(", ")||"Non renseignée")}</p><p><b>Durée :</b> ${item.durationDays?`${item.durationDays} jour${item.durationDays>1?"s":""} (jusqu’au ${fmtDate(item.endDate)})`:"Continu / non renseignée"}</p>`:`<p><b>Heure :</b> ${esc(item.time || "Non renseignée")}</p>`}${item.details ? `<p>${esc(item.details)}</p>` : ""}<div class="detail-actions"><button data-edit>Modifier</button><button class="delete" data-delete>Supprimer</button></div></div>`,
     );
   d.querySelector("[data-edit]").onclick = () => {
     d.remove();
@@ -703,49 +807,69 @@ function openItemDetail(id) {
   };
 }
 function openMetric(id) {
-  const cfg = {
-      sleep: ["Sommeil", "h", 0.25, 0, 24, "ex. 7,5"],
-      water: ["Hydratation", "L", 0.1, 0, 10, "ex. 1,8"],
-      activity: ["Activité", "pas", 100, 0, 50000, "ex. 6200"],
-    },
-    [label, unit, step, min, max, p] = cfg[id],
-    current = (state.metrics[id] || "").toString().replace(/[^\d.,]/g, "").replace(",", "."),
-    d = sheet(
-      `Renseigner : ${label}`,
-      `<form><label>Valeur du jour (${unit})</label><input name="value" type="number" inputmode="decimal" step="${step}" min="${min}" max="${max}" required value="${esc(current)}" placeholder="${p}"><button class="save">Enregistrer</button></form>`,
-    );
-  d.querySelector("form").onsubmit = (e) => {
-    e.preventDefault();
-    const num = new FormData(e.target).get("value");
-    if (num === "" || isNaN(Number(num))) return toast("Entre un nombre valide");
-    const value = `${Number(num).toLocaleString("fr-FR")} ${unit}`;
-    state.metrics[id] = value;
-    state.metricHistory.push({ date: todayISO(), label, value, raw: Number(num) });
-    save();
-    d.remove();
-    renderShell(["sleep","water","activity"].includes(currentPage) ? currentPage : "wellbeing");
-    toast(`${label} mis à jour`);
-  };
+  let d;
+  if (id === "sleep") {
+    d = sheet("Renseigner : Sommeil", `<form><label>Heures dormies</label><input name="hours" type="number" inputmode="decimal" step="0.25" min="0" max="24" required placeholder="ex. 7,5"><label>Qualité</label><select name="quality"><option value="bonne">Bonne</option><option value="moyenne">Moyenne</option><option value="mauvaise">Mauvaise</option></select><label>Note (facultatif)</label><input name="note" placeholder="Réveils, rêves, ressenti…"><button class="save">Enregistrer</button></form>`);
+    d.querySelector("form").onsubmit = (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target), hours = Number(fd.get("hours"));
+      if (isNaN(hours) || hours < 0) return toast("Entre un nombre d’heures valide");
+      state.sleepLog.push({ id: Date.now(), date: todayISO(), hours, quality: fd.get("quality"), note: fd.get("note").trim() });
+      save(); d.remove();
+      renderShell(["sleep"].includes(currentPage) ? currentPage : "wellbeing");
+      toast("Sommeil enregistré");
+    };
+  } else if (id === "water") {
+    d = sheet("Ajouter de l’eau", `<form><label>Quantité (mL)</label><input name="amount" type="number" inputmode="numeric" min="1" max="3000" required placeholder="ex. 250"><div class="two-cols" style="margin:10px 0"><button type="button" class="wide-secondary" data-preset="200">🥛 Verre (200 mL)</button><button type="button" class="wide-secondary" data-preset="500">🍶 Bouteille (500 mL)</button></div><button class="save">Ajouter</button></form>`);
+    d.querySelectorAll("[data-preset]").forEach(b => b.onclick = () => { d.querySelector('[name="amount"]').value = b.dataset.preset; });
+    d.querySelector("form").onsubmit = (e) => {
+      e.preventDefault();
+      const amount = Number(new FormData(e.target).get("amount"));
+      if (isNaN(amount) || amount <= 0) return toast("Entre une quantité valide");
+      state.waterLog.push({ id: Date.now(), date: todayISO(), amountMl: amount });
+      save(); d.remove();
+      renderShell(["water"].includes(currentPage) ? currentPage : "wellbeing");
+      toast(`+${amount} mL ajoutés (${waterDisplay()} aujourd’hui)`);
+    };
+  } else if (id === "activity") {
+    d = sheet("Ajouter une activité", `<form><label>Type</label><select name="type">${Object.entries(activityTypes).map(([v,l])=>`<option value="${v}">${l}</option>`).join("")}</select><div class="two-cols"><div><label>Durée (min)</label><input name="minutes" type="number" min="0" max="600" placeholder="ex. 30"></div><div><label>Pas (facultatif)</label><input name="steps" type="number" min="0" max="50000" placeholder="ex. 4000"></div></div><button class="save">Enregistrer</button></form>`);
+    d.querySelector("form").onsubmit = (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target), minutes = Number(fd.get("minutes")) || 0, steps = Number(fd.get("steps")) || 0;
+      if (!minutes && !steps) return toast("Renseigne une durée ou un nombre de pas");
+      state.activityLog.push({ id: Date.now(), date: todayISO(), type: fd.get("type"), minutes, steps });
+      save(); d.remove();
+      renderShell(["activity"].includes(currentPage) ? currentPage : "wellbeing");
+      toast("Activité enregistrée");
+    };
+  }
 }
-function openReminder() {
+function openReminder(existing = null) {
   const d = sheet(
-    "Nouveau rappel",
-    `<form><label>Titre du rappel</label><input name="title" required placeholder="Ex. Prendre mon traitement"><div class="two-cols"><div><label>Date</label><input name="date" type="date" required value="${todayISO()}"></div><div><label>Heure</label><input name="time" type="time"></div></div><button class="save">Créer le rappel</button></form>`,
+    existing ? "Modifier le rappel" : "Nouveau rappel",
+    `<form><label>Titre du rappel</label><input name="title" required value="${esc(existing?.title||"")}" placeholder="Ex. Prendre mon traitement"><div class="two-cols"><div><label>Date</label><input name="date" type="date" required value="${existing?.date||todayISO()}"></div><div><label>Heure</label><input name="time" type="time" value="${esc(existing?.time||"")}"></div></div>${existing?.recurring?'<p class="storage-note">Ce rappel est lié à un traitement et se répète automatiquement chaque jour jusqu’à la fin prévue.</p>':""}<button class="save">${existing?"Enregistrer":"Créer le rappel"}</button></form>`,
   );
   d.querySelector("form").onsubmit = (e) => {
     e.preventDefault();
     const fd = new FormData(e.target);
-    state.reminders.push({
-      id: Date.now(),
-      title: fd.get("title").trim(),
-      date: fd.get("date"),
-      time: fd.get("time"),
-      done: false,
-    });
+    if (existing) {
+      existing.title = fd.get("title").trim();
+      existing.date = fd.get("date");
+      existing.time = fd.get("time");
+      existing.notified = false;
+    } else {
+      state.reminders.push({
+        id: Date.now(),
+        title: fd.get("title").trim(),
+        date: fd.get("date"),
+        time: fd.get("time"),
+        done: false,
+      });
+    }
     save();
     d.remove();
     renderShell("reminders");
-    toast("Rappel créé");
+    toast(existing ? "Rappel modifié" : "Rappel créé");
   };
 }
 function checkDueReminders() {
@@ -753,13 +877,26 @@ function checkDueReminders() {
   const now = new Date();
   let changed = false;
   state.reminders.forEach((r) => {
-    if (r.done || r.notified) return;
+    if (r.done) return;
     const due = new Date(`${r.date || todayISO()}T${r.time || "00:00"}:00`);
-    if (due <= now) {
+    if (due <= now && !r.notified) {
       try {
         new Notification("Nymia", { body: r.title, icon: "icon-180.png" });
       } catch {}
       r.notified = true;
+      changed = true;
+    }
+    // Rappels de traitement récurrents : une fois notifié, on repousse au lendemain
+    // jusqu’à la fin de la durée du traitement (ou indéfiniment si aucune durée n’est fixée).
+    if (r.recurring && r.notified && due <= now) {
+      const nextDate = addDays(r.date, 1);
+      if (!r.endDate || nextDate <= r.endDate) {
+        r.date = nextDate;
+        r.notified = false;
+        r.done = false;
+      } else {
+        r.done = true;
+      }
       changed = true;
     }
   });
@@ -806,10 +943,10 @@ function openCycleSettings() {
     toast("Mon Carnet a été mis à jour");
   };
 }
-function openCycleNote() {
+function openCycleNote(presetDate) {
   const d = sheet(
     "Ajouter une note",
-    `<form><label>Date</label><input name="date" type="date" value="${todayISO()}"><label>Note</label><textarea name="text" required placeholder="Douleur, humeur, énergie..."></textarea><button class="save">Enregistrer</button></form>`,
+    `<form><label>Date</label><input name="date" type="date" value="${presetDate||todayISO()}"><label>Note</label><textarea name="text" required placeholder="Douleur, humeur, énergie...">${esc((state.cycle.notes.find(n=>n.date===presetDate)||{}).text||"")}</textarea><button class="save">Enregistrer</button></form>`,
   );
   d.querySelector("form").onsubmit = (e) => {
     e.preventDefault();
