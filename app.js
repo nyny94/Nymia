@@ -311,22 +311,23 @@ function wellbeingPage() {
 }
 function cycleInfo() {
   if (!state.cycle.lastPeriod) return null;
-  const next = addDays(
-      state.cycle.lastPeriod,
-      Number(state.cycle.cycleLength) || 28,
-    ),
-    ovulation = addDays(next, -14),
+  const cycleLength = Number(state.cycle.cycleLength) || 28;
+  const next = addDays(state.cycle.lastPeriod, cycleLength),
     delta = daysBetween(todayISO(), next);
-  return { next, ovulation, delta };
+  const rawDay = daysBetween(state.cycle.lastPeriod, todayISO());
+  const dayInCycle = ((rawDay % cycleLength) + cycleLength) % cycleLength + 1;
+  const ovulationDay = Math.max(1, cycleLength - 14);
+  const fertileStart = addDays(state.cycle.lastPeriod, ovulationDay - 5);
+  const fertileEnd = addDays(state.cycle.lastPeriod, ovulationDay + 1);
+  let phase = "Phase folliculaire";
+  if (dayInCycle <= (Number(state.cycle.periodLength) || 5)) phase = "Règles";
+  else if (dayInCycle >= ovulationDay - 2 && dayInCycle <= ovulationDay + 1) phase = "Fenêtre fertile estimée";
+  else if (dayInCycle > ovulationDay + 1) phase = "Phase lutéale";
+  return { next, delta, dayInCycle, cycleLength, phase, fertileStart, fertileEnd };
 }
-function cyclePage() {
-  const info = cycleInfo();
-  const notes = state.cycle.notes.slice().reverse();
-  const cycleText = info && info.delta >= 0 ? `Règles dans ${info.delta} jour${info.delta > 1 ? "s" : ""}` : "Cycle à configurer";
-  return `<section class="journal-dashboard"><header class="journal-title"><div><h2>Mon Carnet <span>📔</span></h2><p>Ton espace d’évolution personnelle.<br><b>Nymia t’accompagne avec bienveillance, sans jugement.</b></p></div><div class="journal-tools"><button aria-label="Rechercher">⌕</button><button class="journal-add" data-cycle-note>+</button><small>Nouvelle note</small></div></header><article class="journal-summary"><div class="journal-bird"><h3>Ce que Colibri a remarqué<br>cette semaine ♡</h3><small>Cette semaine</small><img src="hummingbird.svg" alt="Colibri"></div><div class="journal-observations"><b>Cette semaine, on avance ensemble, à ton rythme.</b><p>💧 <strong>Hydratation à surveiller</strong><br>Ton corps a besoin de régularité.</p><p>☾ <strong>Sommeil et récupération</strong><br>Écoute ton énergie et accorde-toi du repos.</p><p>🍴 <strong>Repas plus équilibrés</strong><br>Rien de grave, on ajuste ensemble.</p><p>🌸 <strong>${cycleText}</strong><br>Pense à ton confort et à tes besoins.</p></div><div class="journal-kind"><span>♡</span><b>Tu n’as rien raté.</b><p>Chaque semaine est une nouvelle occasion de prendre soin de toi.</p><button>Voir le détail ›</button></div></article><article class="journal-next"><span>🪄</span><div><b>Pour la semaine prochaine</b><p>Petit pas par petit pas. On y va doucement, sans pression.</p></div><button data-page="wellbeing">◎ Mes objectifs ›</button></article><div class="journal-section"><h3>Mes sujets clés <small>ⓘ</small></h3><button>Tout voir ›</button></div><p class="journal-subtitle">Ce qui compte pour toi, analysé avec bienveillance.</p><div class="journal-topics">${[["♡","Santé","Prends soin de toi et repose-toi quand ton corps te le dit.","À surveiller","rose"],["🥗","Alimentation","Reviens doucement vers des repas simples et nourrissants.","À rééquilibrer","green"],["☾","Sommeil","Un coucher régulier sera ton meilleur allié.","À prendre en main","purple"],["👟","Activité","Même 10 min par jour peuvent faire la différence.","À relancer","blue"],["❀","Cycle",cycleText + ". Pense à ton confort.","À anticiper","orange"]].map(([ic,t,p,b,c])=>`<article class="${c}"><span>${ic}</span><b>${t}</b><p>${p}</p><em>${b}</em></article>`).join("")}</div><div class="journal-section"><h3>Mes trackers <small>— cette semaine</small></h3><button data-page="wellbeing">Voir le détail ›</button></div><div class="journal-trackers">${[["💧","Hydratation",state.metrics.water||"1,0 L / jour","Insuffisant","blue"],["🥗","Repas équilibrés","3 / 7 jours","À améliorer","green"],["☾","Sommeil",state.metrics.sleep||"5h45 / nuit","Trop faible","purple"],["🚶","Pas quotidiens",state.metrics.activity||"4 210 pas","En dessous","orange"],["❀","Bien-être","2 / 7 jours","Prends soin de toi","rose"]].map(([ic,t,v,s,c])=>`<button class="${c}" data-page="wellbeing"><span>${ic}</span><b>${t}</b><strong>${esc(v)}</strong><small>${s}</small><i></i></button>`).join("")}</div><div class="journal-bottom"><article><h3>Mes pistes pour aller mieux</h3><p>☾ <b>Me coucher 30 min plus tôt</b><small>Pour récupérer et améliorer mes nuits</small></p><p>💧 <b>Boire 1,5 L d’eau par jour</b><small>Commencer la journée avec un grand verre</small></p><p>🥗 <b>Préparer 3 repas maison simples</b><small>Équilibrés, rassasiants et bons pour moi</small></p></article><article><h3>Mes notes récentes <button data-cycle-note>Tout voir ›</button></h3>${notes.length ? notes.slice(0,3).map(n=>`<p class="journal-note"><span>♡</span><b>${fmtDate(n.date)}</b><small>${esc(n.text)}</small></p>`).join("") : `<div class="journal-empty"><span>♡</span><b>Ton carnet commence ici</b><p>Ajoute un moment, une pensée ou une petite victoire.</p><button data-cycle-note>Écrire ma première note</button></div>`}</article></div><button class="journal-cycle-settings" data-cycle-settings>🌸 ${info ? "Modifier les informations de mon cycle" : "Configurer le suivi de mon cycle"}</button></section>`;
-}
-function innerHeader(title, subtitle, back="home") {
-  return `<div class="inner-head"><button data-page="${back}" aria-label="Retour">‹</button><div><h2>${title}</h2><p>${subtitle}</p></div></div>`;
+
+function innerHeader(title, subtitle, back="home", closeLabel="Retour") {
+  return `<div class="inner-head"><button data-page="${back}" aria-label="${closeLabel}">‹</button><div><h2>${title}</h2><p>${subtitle}</p></div></div>`;
 }
 function journalPage(){
   const info=cycleInfo(),notes=state.cycle.notes.slice().reverse();
@@ -340,8 +341,8 @@ function journalPage(){
   return `<section class="journal-dashboard"><header class="journal-title"><div><h2>Mon Carnet <span>📔</span></h2><p>Ton espace d’évolution personnelle.<br><b>Uniquement à partir de tes propres données.</b></p></div><div class="journal-tools"><button aria-label="Rechercher">⌕</button><button class="journal-add" data-cycle-note>+</button><small>Nouvelle note</small></div></header>${hasData?`<article class="journal-summary"><div class="journal-bird"><h3>Ce que Colibri a remarqué<br>cette semaine ♡</h3><small>D’après tes saisies</small><img src="hummingbird.svg" alt="Colibri"></div><div class="journal-observations"><b>${signals.length?"Voici les informations que tu as enregistrées :":"Aucune donnée de suivi cette semaine."}</b>${signals.map(([ic,t,v])=>`<p>${ic} <strong>${t}</strong><br>${esc(v)}</p>`).join("")}</div><div class="journal-kind"><span>♡</span><b>Aucun jugement.</b><p>Ce carnet résume tes données sans inventer de conclusion médicale.</p></div></article>`:`<article class="journal-no-data"><img src="hummingbird.svg" alt=""><h3>Ton carnet est encore vide</h3><p>Colibri ne fera aucune remarque tant que tu n’auras pas renseigné de données.</p><button data-page="tracking">Commencer mon suivi</button></article>`}<article class="journal-next"><span>◎</span><div><b>Mes objectifs personnels</b><p>Choisis tes objectifs au lieu d’être redirigée vers une page générale.</p></div><button data-page="goals">Ouvrir mes objectifs ›</button></article><div class="journal-section"><h3>Mes sujets suivis</h3><button data-page="tracking">Tout voir ›</button></div>${signals.length?`<div class="journal-topics">${signals.map(([ic,t,v,page],i)=>`<button class="topic-button" data-page="${page}"><span>${ic}</span><b>${t}</b><p>${esc(v)}</p><em>Voir mon suivi</em></button>`).join("")}</div>`:`<div class="today-empty">Aucun sujet analysé sans données.</div>`}<div class="journal-bottom"><article><h3>Mes pistes personnelles</h3>${signals.length?`<p>Les conseils apparaîtront progressivement à partir de tes objectifs et de tes données. Ils resteront généraux et prudents.</p><button class="wide-secondary" data-page="goals">Définir mes objectifs</button>`:`<p class="muted">Aucune piste affichée : il n’y a pas encore assez d’informations.</p>`}</article><article><h3>Mes notes récentes <button data-cycle-note>Ajouter ›</button></h3>${notes.length?notes.slice(0,3).map(n=>`<p class="journal-note"><span>♡</span><b>${fmtDate(n.date)}</b><small>${esc(n.text)}</small></p>`).join(""):`<div class="journal-empty"><span>♡</span><b>Ton carnet commence ici</b><p>Ajoute une pensée ou un ressenti.</p></div>`}</article></div><button class="journal-cycle-settings" data-page="cycle-detail">🌸 Ouvrir mon suivi du cycle</button></section>`;
 }
 function agendaPage() {
-  const appointments=upcomingItems().filter(i=>i.type==="appointment");
-  return `<section class="module-page functional-page">${innerHeader("Mes rendez-vous","Tous tes rendez-vous à venir.")}<button class="wide-primary" data-add="appointment">+ Ajouter un rendez-vous</button>${appointments.length?`<div class="functional-list">${appointments.map(itemRow).join("")}</div>`:`<div class="empty"><div class="empty-icon">🗓️</div><h3>Aucun rendez-vous à venir</h3><p>Les rendez-vous que tu ajoutes apparaîtront ici.</p></div>`}</section>`;
+  const items=upcomingItems();
+  return `<section class="module-page functional-page">${innerHeader("À venir","Tout ce qui arrive : rendez-vous, traitements, examens…")}<button class="wide-primary" data-open-add-menu>+ Ajouter</button>${items.length?`<div class="functional-list">${items.map(itemRow).join("")}</div>`:`<div class="empty"><div class="empty-icon">🗓️</div><h3>Rien à venir</h3><p>Les rendez-vous, traitements et examens que tu ajoutes apparaîtront ici, triés par date.</p></div>`}</section>`;
 }
 function documentsPage() {
   const docs=state.items.filter(i=>i.type==="document");
@@ -363,21 +364,25 @@ function meditationPage() {
   return `<section class="module-page functional-page">${innerHeader("Méditation et respiration","Choisis une durée et lance un vrai compte à rebours.","wellbeing")}<div class="duration-grid">${[1,5,10].map(m=>`<button data-start-timer="${m}"><b>${m}</b><small>minute${m>1?"s":""}</small></button>`).join("")}</div><div class="history"><h3>Mes pauses terminées</h3>${state.meditationHistory.length?state.meditationHistory.slice().reverse().map(h=>`<div><b>${fmtDate(h.date)}</b><span>${h.minutes} min</span></div>`).join(""):`<p class="muted">Aucune pause terminée.</p>`}</div></section>`;
 }
 function programsPage() {
-  return `<section class="module-page functional-page">${innerHeader("Mes programmes","Des étapes simples que tu peux cocher.","wellbeing")}<div class="program-list">${[["fitness","Remise en forme","Marcher 15 min|Étirements 5 min|Boire après l’effort"],["food","Équilibre alimentaire","Ajouter un légume|Préparer un repas maison|Boire un verre d’eau"],["calm","Gestion du stress","Respirer 5 min|Couper les écrans 20 min|Noter une pensée positive"]].map(([id,t,steps])=>`<article><h3>${t}</h3>${steps.split("|").map((s,i)=>`<label><input type="checkbox" data-program-step="${id}-${i}" ${state.settings[`step-${id}-${i}`]?"checked":""}> ${s}</label>`).join("")}</article>`).join("")}</div></section>`;
+  return `<section class="module-page functional-page">${innerHeader("Mes programmes","Des étapes simples que tu peux cocher, jour après jour.","wellbeing")}<div class="program-list">${[
+    ["fitness","Remise en forme · 4 semaines","Marcher 15 min|Étirements doux 5 min|Boire un grand verre d’eau après l’effort|10 squats ou pompes sur les genoux|Marcher 20 min|Étirements du dos et des épaules|Jour de repos actif : bouger 10 min, sans objectif"],
+    ["food","Équilibre alimentaire · 3 semaines","Ajouter un légume à chaque repas|Préparer un repas maison simple|Boire un verre d’eau au réveil|Remplacer une collation sucrée par un fruit|Manger sans écran une fois dans la journée|Prévoir les repas du lendemain|Cuisiner en plus grande quantité pour la semaine"],
+    ["calm","Gestion du stress · 7 jours","Respirer 5 min (4 secondes inspiration, 6 secondes expiration)|Couper les écrans 20 min avant de dormir|Noter une pensée positive dans le journal|Marcher sans téléphone pendant 10 min|Étirer le cou et les épaules 5 min|Écrire ce qui pèse, sans chercher à le résoudre|Faire une chose plaisante, même petite"],
+  ].map(([id,t,steps])=>`<article><h3>${t}</h3>${steps.split("|").map((s,i)=>`<label><input type="checkbox" data-program-step="${id}-${i}" ${state.settings[`step-${id}-${i}`]?"checked":""}> ${s}</label>`).join("")}</article>`).join("")}</div></section>`;
 }
 function treatmentsPage(){const list=state.items.filter(i=>i.type==="treatment");return `<section class="module-page functional-page">${innerHeader("Mes traitements","Traitements enregistrés et rappels associés.","health")}<button class="wide-primary" data-add="treatment">+ Ajouter un traitement</button>${list.length?`<div class="functional-list">${list.map(itemRow).join("")}</div><button class="wide-secondary" data-treatment-reminders>Créer les rappels manquants</button>`:`<div class="empty"><div class="empty-icon">💊</div><h3>Aucun traitement</h3></div>`}<button class="wide-secondary" data-page="reminders">Gérer tous mes rappels</button></section>`}
 function healthOverviewPage(){const counts=Object.keys(typeMeta).map(id=>[typeMeta[id][0],typeMeta[id][1],state.items.filter(i=>i.type===id).length]);return `<section class="module-page functional-page">${innerHeader("Bilan de mon dossier","Un récapitulatif, différent des boutons d’ajout.","health")}<div class="overview-grid">${counts.map(([ic,l,n])=>`<article><span>${ic}</span><b>${n}</b><small>${l}</small></article>`).join("")}</div></section>`}
 function goalsPage(){const goals=[["sleep","Mieux dormir"],["water","Boire suffisamment"],["activity","Bouger davantage"],["nutrition","Mieux manger"],["cycle","Suivre mon cycle"],["health","Organiser ma santé"]];return `<section class="module-page functional-page">${innerHeader("Mes objectifs","Choisis ce qui compte vraiment pour toi.","profile")}<div class="goal-list">${goals.map(([id,l])=>`<label><input type="checkbox" data-profile-goal="${id}" ${state.profile.goals.includes(id)?"checked":""}><span>${l}</span></label>`).join("")}</div></section>`}
 function privacyPage(){return `<section class="module-page functional-page">${innerHeader("Confidentialité","Comprendre où restent tes informations.","profile")}<article class="privacy-detail"><h3>🔒 Stockage local</h3><p>Tes données sont enregistrées dans le navigateur de cet appareil. Nymia ne les envoie pas sur un serveur.</p><h3>Suppression</h3><p>Tu peux effacer toutes les données depuis le profil.</p><h3>Photo et documents</h3><p>Ils restent également sur cet appareil. Une désinstallation ou un nettoyage de Safari peut les supprimer : utilise la sauvegarde.</p></article></section>`}
 function backupPage(){return `<section class="module-page functional-page">${innerHeader("Sauvegarde","Créer une copie ou restaurer l’application.","profile")}<button class="wide-primary" data-export>Créer une sauvegarde</button><label class="import-backup">Restaurer une sauvegarde<input type="file" accept="application/json" data-import-backup></label><p class="storage-note">La sauvegarde contient tes données Nymia au format JSON. L’export simple sert à récupérer une copie ; la restauration réinjecte cette copie dans l’application.</p></section>`}
-function cycleDetailPage(){const info=cycleInfo();return `<section class="module-page functional-page">${innerHeader("Suivi du cycle","Un écran clair pour tes dates et symptômes.","cycle")}<article class="cycle-detail-hero"><span>🌸</span><div><small>Prochaines règles estimées</small><h3>${info?fmtDate(info.next,{day:"numeric",month:"long",year:"numeric"}):"Cycle non configuré"}</h3><p>${info?`${info.delta} jour${info.delta>1?"s":""} restant${info.delta>1?"s":""}`:"Ajoute le premier jour de tes dernières règles."}</p></div></article><button class="wide-primary" data-cycle-settings>${info?"Modifier mes dates":"Configurer mon cycle"}</button><div class="cycle-grid"><article><span>Durée moyenne</span><b>${state.cycle.cycleLength} jours</b></article><article><span>Durée des règles</span><b>${state.cycle.periodLength} jours</b></article></div><div class="safety-note">Les estimations ne sont ni un diagnostic ni un moyen de contraception.</div><div class="section-head"><h3>JOURNAL DU CYCLE</h3><button data-cycle-note>Ajouter ›</button></div>${state.cycle.notes.length?`<div class="notes-list">${state.cycle.notes.slice().reverse().map(n=>`<div><b>${fmtDate(n.date)}</b><p>${esc(n.text)}</p></div>`).join("")}</div>`:`<div class="today-empty">Aucun symptôme ou ressenti enregistré.</div>`}</section>`}
+function cycleDetailPage(){const info=cycleInfo();return `<section class="module-page functional-page">${innerHeader("Suivi du cycle","Un écran clair pour tes dates et symptômes.","cycle")}<article class="cycle-detail-hero"><span>🌸</span><div><small>Prochaines règles estimées</small><h3>${info?fmtDate(info.next,{day:"numeric",month:"long",year:"numeric"}):"Cycle non configuré"}</h3><p>${info?`${info.delta} jour${info.delta>1?"s":""} restant${info.delta>1?"s":""}`:"Ajoute le premier jour de tes dernières règles."}</p></div></article>${info?`<div class="data-hero" style="margin-bottom:16px"><span>${info.phase==="Règles"?"🩸":info.phase==="Fenêtre fertile estimée"?"🌸":"🌙"}</span><b>Jour ${info.dayInCycle} / ${info.cycleLength}</b><small>${esc(info.phase)}</small><div class="wellness-progress" style="margin-top:12px"><i style="width:${Math.min(100,Math.round(info.dayInCycle/info.cycleLength*100))}%"></i></div></div><div class="cycle-grid" style="margin-bottom:16px"><article><span>Fenêtre fertile estimée</span><b>${fmtDate(info.fertileStart,{day:"numeric",month:"short"})} → ${fmtDate(info.fertileEnd,{day:"numeric",month:"short"})}</b></article></div>`:""}<button class="wide-primary" data-cycle-settings>${info?"Modifier mes dates":"Configurer mon cycle"}</button><div class="cycle-grid"><article><span>Durée moyenne</span><b>${state.cycle.cycleLength} jours</b></article><article><span>Durée des règles</span><b>${state.cycle.periodLength} jours</b></article></div><div class="safety-note">Les estimations ne sont ni un diagnostic ni un moyen de contraception.</div><div class="section-head"><h3>JOURNAL DU CYCLE</h3><button data-cycle-note>Ajouter ›</button></div>${state.cycle.notes.length?`<div class="notes-list">${state.cycle.notes.slice().reverse().map(n=>`<div><b>${fmtDate(n.date)}</b><p>${esc(n.text)}</p></div>`).join("")}</div>`:`<div class="today-empty">Aucun symptôme ou ressenti enregistré.</div>`}</section>`}
 function remindersPage() {
   const list = [...state.reminders].sort(
     (a, b) =>
       a.done - b.done ||
       `${a.date}${a.time}`.localeCompare(`${b.date}${b.time}`),
   );
-  return `<section class="module-page functional-page">${innerHeader("Mes notifications","Traitements, hydratation et tâches importantes.","home")}<button class="page-add reminder-add" data-add-reminder>+</button><div class="reminder-tabs"><span>${list.filter((r) => !r.done).length} à faire</span><span>${list.filter((r) => r.done).length} terminé${list.filter((r) => r.done).length > 1 ? "s" : ""}</span></div>${list.length ? `<div class="reminder-list">${list.map((r) => `<article class="reminder-row ${r.done ? "done" : ""}"><button data-toggle-reminder="${r.id}" aria-label="Marquer comme fait">${r.done ? "✓" : ""}</button><div><h3>${esc(r.title)}</h3><p>${fmtDate(r.date)} · ${esc(r.time || "Sans heure")}</p></div><button data-delete-reminder="${r.id}" aria-label="Supprimer">×</button></article>`).join("")}</div>` : `<div class="empty"><div class="empty-icon">🔔</div><h3>Aucun rappel</h3><p>Ajoute un rappel pour un traitement ou l’hydratation.</p></div>`}<button class="wide-secondary" data-request-notification>${state.notificationChoice === "granted" ? "Notifications autorisées" : "Activer les notifications"}</button></section>`;
+  return `<section class="module-page functional-page">${innerHeader("Mes notifications","Traitements, hydratation et tâches importantes.","home","Fermer")}<button class="page-add reminder-add" data-add-reminder>+</button><button class="hard-close" data-page="home" aria-label="Fermer">✕ Fermer</button><div class="reminder-tabs"><span>${list.filter((r) => !r.done).length} à faire</span><span>${list.filter((r) => r.done).length} terminé${list.filter((r) => r.done).length > 1 ? "s" : ""}</span></div>${list.length ? `<div class="reminder-list">${list.map((r) => `<article class="reminder-row ${r.done ? "done" : ""}"><button data-toggle-reminder="${r.id}" aria-label="Marquer comme fait">${r.done ? "✓" : ""}</button><div><h3>${esc(r.title)}</h3><p>${fmtDate(r.date)} · ${esc(r.time || "Sans heure")}</p></div><button data-delete-reminder="${r.id}" aria-label="Supprimer">×</button></article>`).join("")}</div>` : `<div class="empty"><div class="empty-icon">🔔</div><h3>Aucun rappel</h3><p>Ajoute un rappel pour un traitement ou l’hydratation.</p></div>`}<button class="wide-secondary" data-request-notification>${state.notificationChoice === "granted" ? "Notifications autorisées" : "Activer les notifications"}</button><p class="storage-note">${state.notificationChoice === "granted" ? "Une alerte se déclenche à l’heure prévue lorsque Nymia est ouverte ou revient au premier plan." : "Active les notifications pour recevoir une alerte au moment prévu."}</p></section>`;
 }
 function colibriAnswer(q) {
   const s = q.toLowerCase();
@@ -385,8 +390,16 @@ function colibriAnswer(q) {
     return `Si la situation est urgente ou inquiétante, appelle immédiatement le 15 ou le 112. Je ne peux pas évaluer une urgence médicale.`;
   if (/mal au ventre|ventre|digestion|nausée/.test(s))
     return `Pour un inconfort digestif léger, privilégie temporairement de petites portions simples : riz, banane, compote, pain grillé, légumes bien cuits, bouillon, et bois régulièrement par petites gorgées. Évite l’alcool, les plats très gras ou épicés. Si la douleur est forte, localisée, persiste, s’accompagne de fièvre, vomissements répétés, sang ou grossesse possible, demande rapidement un avis médical. Je ne peux pas te conseiller un médicament sans connaître ta situation.`;
-  if (/manger|nutrition|repas|aliment|maigrir|grossir/.test(s))
-    return `Je peux proposer des repères généraux : une source de légumes ou fruits, une protéine, un féculent adapté à ta faim et de l’eau. Dis-moi ton objectif, tes allergies, ce que tu n’aimes pas et ce que tu as à la maison pour une suggestion plus utile. Pour un régime médical, une grossesse, un diabète ou des troubles alimentaires, il faut l’avis d’un professionnel.`;
+  if (/manger|nutrition|repas|aliment|maigrir|grossir|régime|regime/.test(s))
+    return `Une assiette équilibrée simple : la moitié de légumes, un quart de protéines (œufs, légumineuses, poisson, viande), un quart de féculents, et de l’eau. Exemple rapide : riz + pois chiches + légumes rôtis + filet d’huile d’olive. Dis-moi ton objectif, tes allergies ou ce que tu as chez toi pour un conseil plus précis. Pour un régime médical, une grossesse, un diabète ou des troubles alimentaires, il faut l’avis d’un professionnel.`;
+  if (/stress|anxiét|anxiet|angoisse|nerveux|nerveuse/.test(s))
+    return `Pour redescendre rapidement : respire 4 secondes en inspirant, 6 secondes en expirant, pendant 2 minutes (le bouton « Ma pause » dans Bien-être te guide). Marcher 10 minutes ou écrire ce qui te tracasse aide aussi souvent. Si le stress est intense, quotidien ou t’empêche de fonctionner, un professionnel (médecin, psychologue) peut t’accompagner.`;
+  if (/fatigue|épuisé|epuise|fatigué|fatiguee/.test(s))
+    return `Une fatigue passagère répond souvent à un meilleur sommeil, de l’eau, et des repas réguliers avec assez de protéines. Une fatigue qui dure plusieurs semaines, inhabituelle ou avec d’autres symptômes mérite un avis médical (elle peut avoir plusieurs causes).`;
+  if (/sport|exercice|muscl|courir|running|marche/.test(s))
+    return `Pour commencer sans te blesser : 2 à 3 séances par semaine, 20 à 30 minutes, en augmentant progressivement. Marche rapide, vélo ou natation sont de bons points de départ. Échauffe-toi avant, étire-toi après, et arrête en cas de douleur vive. Un avis médical est utile en cas de problème cardiaque, articulaire ou de grossesse.`;
+  if (/peau|acné|acne|bouton/.test(s))
+    return `Pour la peau : nettoyage doux, hydratation adaptée à ton type de peau, et protection solaire régulière aident au quotidien. Pour de l’acné persistante, des douleurs ou des changements inhabituels, un dermatologue pourra proposer un traitement adapté.`;
   if (/mal de tête|migraine/.test(s))
     return `Pour un mal de tête léger : repose-toi au calme, hydrate-toi et évite les écrans quelques minutes. Une douleur brutale inhabituelle, après un choc, avec fièvre, raideur de nuque, faiblesse ou trouble de la parole nécessite un avis urgent. Pour un médicament, vérifie avec un pharmacien ou un médecin selon tes antécédents et traitements.`;
   if (/rappel|notification/.test(s))
@@ -404,7 +417,7 @@ function colibriPage() {
 }
 function profilePage() {
   const name = esc(state.profile.firstName || "Nymia");
-  return `<section class="profile-dashboard"><header class="profile-title"><div><h2>Profil <span>🕊️</span></h2><p>Ton espace, tes réglages, ta confidentialité.</p></div><button data-page="reminders">♧<i></i></button></header><article class="profile-welcome"><button class="profile-photo ${state.profile.photo?"has-photo":""}" data-profile-photo ${state.profile.photo?`style="background-image:url('${state.profile.photo}')"`:""} aria-label="Choisir une photo"></button><div><h3>Bonjour, ${name} <span>♥</span></h3><p>Prendre soin de toi, chaque jour,<br>à ton rythme.</p><button data-edit-profile>✎ Modifier mon profil</button></div><blockquote>“<p>Chaque petit pas compte.<br>Tu es en chemin et tu fais déjà de belles choses.</p><small>♥ Colibri</small></blockquote></article><h3 class="profile-section-title">Mon compte</h3><div class="profile-account">${[["♙","Informations personnelles","Nom, âge, taille, poids, coordonnées…","edit-profile"],["◎","Mes objectifs","Une page dédiée à tes objectifs","goals"],["♧","Notifications","Gérer les rappels et alertes","reminders"],["♙","Confidentialité","Données, partage, sécurité","privacy"] ,["↥","Sauvegarde","Sauvegarder et restaurer les données","backup"],["⇩","Exporter mes données","Télécharger une copie personnelle","export"]].map(([ic,t,p,a])=>`<button ${a==="edit-profile"?'data-edit-profile':a==="export"?'data-export':`data-page="${a}"`}><span>${ic}</span><b>${t}</b><small>${p}</small><i>›</i></button>`).join("")}</div><h3 class="profile-section-title">Personnalisation</h3><article class="profile-custom"><button data-pref="theme"><span>☾</span><b>Thème</b><small>${state.settings.theme==="dark"?"Sombre":"Clair"}</small><i>›</i></button><button data-pref="textSize"><span>Aa</span><b>Taille du texte</b><small>${state.settings.textSize==="large"?"Grande":"Moyenne"}</small><i>›</i></button><button data-pref="color"><span>♡</span><b>Couleurs</b><small>${state.settings.color==="rose"?"Rose":"Lavande"}</small><i>›</i></button><button data-pref="language"><span>☻</span><b>Langue</b><small>Français</small><i>›</i></button><div class="profile-notebook"></div></article><h3 class="profile-section-title">Support & à propos</h3><div class="profile-support"><div><button data-help>ⓘ <span><b>Centre d’aide</b><small>FAQ et fonctionnement</small></span><i>›</i></button><button data-contact>☵ <span><b>Nous contacter</b><small>Informations de contact</small></span><i>›</i></button><button data-about>ⓘ <span><b>À propos de Nymia</b><small>Notre mission, nos valeurs</small></span><i>›</i></button><button data-rate>☆ <span><b>Noter l’application</b><small>Ton avis nous aide à nous améliorer</small></span><i>›</i></button></div><article><img src="hummingbird.svg" alt="Colibri"><p>Nymia <span>♥</span> :<br>ton alliée bienveillante<br>pour ta santé et ton bien-être.</p><small>Version 1.0.0</small></article></div><button class="profile-reset" data-reset>Effacer toutes mes données</button></section>`;
+  return `<section class="profile-dashboard"><header class="profile-title"><div><h2>Profil <span>🕊️</span></h2><p>Ton espace, tes réglages, ta confidentialité.</p></div><button data-page="reminders">♧<i></i></button></header><article class="profile-welcome"><button class="profile-photo ${state.profile.photo?"has-photo":""}" data-profile-photo ${state.profile.photo?`style="background-image:url('${state.profile.photo}')"`:""} aria-label="Choisir une photo"></button><div><h3>Bonjour, ${name} <span>♥</span></h3><p>Prendre soin de toi, chaque jour,<br>à ton rythme.</p><button data-edit-profile>✎ Modifier mon profil</button></div><blockquote>“<p>Chaque petit pas compte.<br>Tu es en chemin et tu fais déjà de belles choses.</p><small>♥ Colibri</small></blockquote></article><h3 class="profile-section-title">Mon compte</h3><div class="profile-account">${[["♙","Informations personnelles","Nom, âge, taille, poids, coordonnées…","edit-profile"],["◎","Mes objectifs","Une page dédiée à tes objectifs","goals"],["♧","Notifications","Gérer les rappels et alertes","reminders"],["♙","Confidentialité","Données, partage, sécurité","privacy"] ,["↥","Sauvegarde et export","Sauvegarder, restaurer ou télécharger tes données","backup"]].map(([ic,t,p,a])=>`<button ${a==="edit-profile"?'data-edit-profile':`data-page="${a}"`}><span>${ic}</span><b>${t}</b><small>${p}</small><i>›</i></button>`).join("")}</div><h3 class="profile-section-title">Personnalisation</h3><article class="profile-custom"><button data-pref="theme"><span>☾</span><b>Thème</b><small>${state.settings.theme==="dark"?"Sombre":"Clair"}</small><i>›</i></button><button data-pref="textSize"><span>Aa</span><b>Taille du texte</b><small>${state.settings.textSize==="large"?"Grande":"Moyenne"}</small><i>›</i></button><button data-pref="color"><span>♡</span><b>Couleurs</b><small>${state.settings.color==="rose"?"Rose":"Lavande"}</small><i>›</i></button><button data-pref="language"><span>☻</span><b>Langue</b><small>Français</small><i>›</i></button><div class="profile-notebook"></div></article><h3 class="profile-section-title">Support & à propos</h3><div class="profile-support"><div><button data-help>ⓘ <span><b>Centre d’aide</b><small>FAQ et fonctionnement</small></span><i>›</i></button><button data-contact>☵ <span><b>Nous contacter</b><small>Informations de contact</small></span><i>›</i></button><button data-about>ⓘ <span><b>À propos de Nymia</b><small>Notre mission, nos valeurs</small></span><i>›</i></button><button data-rate>☆ <span><b>Noter l’application</b><small>Ton avis nous aide à nous améliorer</small></span><i>›</i></button></div><article><img src="hummingbird.svg" alt="Colibri"><p>Nymia <span>♥</span> :<br>ton alliée bienveillante<br>pour ta santé et ton bien-être.</p><small>Version 1.0.0</small></article></div><button class="profile-reset" data-reset>Effacer toutes mes données</button></section>`;
 }
 function shellContent(page) {
   const pages={home,health:healthPage,wellbeing:wellbeingPage,cycle:journalPage,reminders:remindersPage,colibri:colibriPage,profile:profilePage,agenda:agendaPage,documents:documentsPage,tracking:trackingPage,nutrition:nutritionPage,meditation:meditationPage,programs:programsPage,treatments:treatmentsPage,"health-overview":healthOverviewPage,goals:goalsPage,privacy:privacyPage,backup:backupPage,"cycle-detail":cycleDetailPage,sleep:()=>metricDetailPage("sleep"),activity:()=>metricDetailPage("activity"),water:()=>metricDetailPage("water")};
@@ -425,6 +438,9 @@ function bindShell() {
     .forEach((b) => (b.onclick = () => b.dataset.add === "document" ? openDocumentUpload() : openForm(b.dataset.add)));
   document
     .querySelector("[data-open-add]")
+    ?.addEventListener("click", openAddMenu);
+  document
+    .querySelector("[data-open-add-menu]")
     ?.addEventListener("click", openAddMenu);
   document
     .querySelectorAll("[data-metric]")
@@ -469,23 +485,6 @@ function bindShell() {
   document
     .querySelector("[data-customize]")
     ?.addEventListener("click", openCustomize);
-  document.querySelectorAll("[data-wellness]").forEach(
-    (b) =>
-      (b.onclick = () =>
-        toast(
-          b.dataset.wellness === "nutrition"
-            ? "Le suivi nutrition arrive dans la prochaine étape"
-            : "Ce programme arrive dans la prochaine étape",
-        )),
-  );
-  document
-    .querySelector("[data-start-pause]")
-    ?.addEventListener("click", () =>
-      sheet(
-        "Ma pause",
-        '<div class="pause-card"><div class="pause-orb">10:00</div><h3>Respire doucement</h3><p>Inspire pendant 4 secondes, puis expire pendant 6 secondes.</p><button class="wide-primary" data-close-pause>Terminer ma pause</button></div>',
-      ),
-    );
   document
     .querySelector("[data-gratitude]")
     ?.addEventListener("click", () => {
@@ -604,7 +603,25 @@ function startPauseTimer(minutes){
 function openProgram(id){renderShell("programs");setTimeout(()=>document.querySelector(`[data-program-step^="${id}-"]`)?.scrollIntoView({behavior:"smooth",block:"center"}),50)}
 function openHealthSearch(){const d=sheet("Rechercher dans Ma Santé",'<input class="input" data-health-query placeholder="Traitement, rendez-vous, document…"><div data-health-results></div>');const input=d.querySelector("[data-health-query]"),out=d.querySelector("[data-health-results]");input.oninput=()=>{const q=input.value.toLowerCase();const found=state.items.filter(i=>(i.title+" "+(i.details||"")).toLowerCase().includes(q));out.innerHTML=q?(found.length?found.map(i=>`<button class="search-result" data-search-item="${i.id}">${typeMeta[i.type][0]} ${esc(i.title)}</button>`).join(""):'<p class="muted">Aucun résultat</p>'):"";out.querySelectorAll("[data-search-item]").forEach(b=>b.onclick=()=>{d.remove();openItemDetail(Number(b.dataset.searchItem))})}}
 function openDocumentUpload(){const d=sheet("Importer un document",'<form><label>Nom du document</label><input name="title" required placeholder="Ex. Ordonnance"><label>Fichier ou photo</label><input name="file" type="file" accept="image/*,.pdf" required><button class="save">Importer</button></form><p class="storage-note">Taille conseillée : moins de 2 Mo.</p>');d.querySelector("form").onsubmit=e=>{e.preventDefault();const fd=new FormData(e.target),file=fd.get("file");if(file.size>2500000)return toast("Fichier trop volumineux (maximum conseillé : 2,5 Mo)");const reader=new FileReader();reader.onload=()=>{state.items.push({id:Date.now(),type:"document",title:fd.get("title").trim(),date:todayISO(),time:"",details:"",fileName:file.name,fileType:file.type,fileData:reader.result});try{save()}catch{state.items.pop();return toast("Stockage insuffisant pour ce fichier")}d.remove();renderShell("documents");toast("Document importé")};reader.readAsDataURL(file)}}
-function downloadDocument(id){const doc=state.items.find(i=>i.id===id);if(!doc?.fileData)return;const a=document.createElement("a");a.href=doc.fileData;a.download=doc.fileName||doc.title;a.click()}
+async function downloadDocument(id){
+  const doc=state.items.find(i=>i.id===id);
+  if(!doc?.fileData)return;
+  try{
+    const res=await fetch(doc.fileData),blob=await res.blob(),file=new File([blob],doc.fileName||doc.title,{type:doc.fileType||blob.type});
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:doc.fileName||doc.title});
+      return;
+    }
+  }catch{}
+  // Fallback : ouvrir dans un nouvel onglet (le téléchargement direct par data-URI n’est pas fiable sur Safari iOS)
+  const w=window.open(doc.fileData,"_blank");
+  if(!w){
+    const a=document.createElement("a");
+    a.href=doc.fileData;a.download=doc.fileName||doc.title;
+    document.body.appendChild(a);a.click();a.remove();
+  }
+  toast("Ouvert dans un nouvel onglet : utilise le bouton Partager pour l’enregistrer");
+}
 function deleteDocument(id){if(!confirm("Supprimer ce document ?"))return;state.items=state.items.filter(i=>i.id!==id);save();renderShell("documents")}
 function openMealForm(){const d=sheet("Ajouter un repas",'<form><label>Type de repas</label><select name="type"><option>Petit-déjeuner</option><option>Déjeuner</option><option>Dîner</option><option>Collation</option></select><label>Ce que j’ai mangé</label><input name="name" required placeholder="Ex. Poulet, riz et légumes"><label>Note facultative</label><textarea name="details" placeholder="Faim, digestion, ressenti…"></textarea><button class="save">Enregistrer</button></form>');d.querySelector("form").onsubmit=e=>{e.preventDefault();const fd=new FormData(e.target);state.nutrition.push({id:Date.now(),date:todayISO(),type:fd.get("type"),name:fd.get("name").trim(),details:fd.get("details").trim()});save();d.remove();renderShell("nutrition");toast("Repas enregistré")}}
 function openHydrationReminder(){const d=sheet("Rappel d’hydratation",'<form><label>Heure du rappel</label><input type="time" name="time" required value="10:00"><button class="save">Enregistrer</button></form>');d.querySelector("form").onsubmit=e=>{e.preventDefault();const time=new FormData(e.target).get("time");state.settings.hydrationAlerts=true;state.reminders.push({id:Date.now(),title:"Boire un verre d’eau",date:todayISO(),time,done:false});save();d.remove();renderShell("water");toast("Rappel d’hydratation créé")}}
@@ -641,7 +658,7 @@ function openForm(type, item = null) {
   const [, label] = typeMeta[type],
     d = sheet(
       `${item ? "Modifier" : "Ajouter"} : ${label}`,
-      `<form id="itemForm"><label>Titre</label><input name="title" required value="${esc(item?.title || "")}" placeholder="${label}"><div class="two-cols"><div><label>Date</label><input name="date" type="date" value="${esc(item?.date || todayISO())}"></div><div><label>Heure</label><input name="time" type="time" value="${esc(item?.time || "")}"></div></div><label>Détails</label><textarea name="details" placeholder="Informations facultatives">${esc(item?.details || "")}</textarea>${type==="treatment"?'<label class="check-line"><input type="checkbox" name="createReminder" checked> Créer aussi un rappel de prise</label>':""}<button class="save">Enregistrer</button></form>`,
+      `<form id="itemForm"><label>Titre</label><input name="title" required value="${esc(item?.title || "")}" placeholder="${label}"><div class="two-cols"><div><label>Date</label><input name="date" type="date" value="${esc(item?.date || todayISO())}"></div><div><label>Heure</label><input name="time" type="time" value="${esc(item?.time || (type==="treatment"?"08:00":""))}"></div></div><label>Détails</label><textarea name="details" placeholder="Informations facultatives">${esc(item?.details || "")}</textarea>${type==="treatment"?'<label class="check-line"><input type="checkbox" name="createReminder" checked> Créer aussi un rappel de prise</label>':""}<button class="save">Enregistrer</button></form>`,
     );
   d.querySelector("form").onsubmit = (e) => {
     e.preventDefault();
@@ -686,21 +703,24 @@ function openItemDetail(id) {
   };
 }
 function openMetric(id) {
-  const labels = {
-      sleep: ["Sommeil", "ex. 7 h 30"],
-      water: ["Hydratation", "ex. 1,8 L"],
-      activity: ["Activité", "ex. 6 200 pas"],
+  const cfg = {
+      sleep: ["Sommeil", "h", 0.25, 0, 24, "ex. 7,5"],
+      water: ["Hydratation", "L", 0.1, 0, 10, "ex. 1,8"],
+      activity: ["Activité", "pas", 100, 0, 50000, "ex. 6200"],
     },
-    [label, p] = labels[id],
+    [label, unit, step, min, max, p] = cfg[id],
+    current = (state.metrics[id] || "").toString().replace(/[^\d.,]/g, "").replace(",", "."),
     d = sheet(
       `Renseigner : ${label}`,
-      `<form><label>Valeur du jour</label><input name="value" required value="${esc(state.metrics[id])}" placeholder="${p}"><button class="save">Enregistrer</button></form>`,
+      `<form><label>Valeur du jour (${unit})</label><input name="value" type="number" inputmode="decimal" step="${step}" min="${min}" max="${max}" required value="${esc(current)}" placeholder="${p}"><button class="save">Enregistrer</button></form>`,
     );
   d.querySelector("form").onsubmit = (e) => {
     e.preventDefault();
-    const value = new FormData(e.target).get("value").trim();
+    const num = new FormData(e.target).get("value");
+    if (num === "" || isNaN(Number(num))) return toast("Entre un nombre valide");
+    const value = `${Number(num).toLocaleString("fr-FR")} ${unit}`;
     state.metrics[id] = value;
-    state.metricHistory.push({ date: todayISO(), label, value });
+    state.metricHistory.push({ date: todayISO(), label, value, raw: Number(num) });
     save();
     d.remove();
     renderShell(["sleep","water","activity"].includes(currentPage) ? currentPage : "wellbeing");
@@ -727,6 +747,30 @@ function openReminder() {
     renderShell("reminders");
     toast("Rappel créé");
   };
+}
+function checkDueReminders() {
+  if (state.notificationChoice !== "granted") return;
+  const now = new Date();
+  let changed = false;
+  state.reminders.forEach((r) => {
+    if (r.done || r.notified) return;
+    const due = new Date(`${r.date || todayISO()}T${r.time || "00:00"}:00`);
+    if (due <= now) {
+      try {
+        new Notification("Nymia", { body: r.title, icon: "icon-180.png" });
+      } catch {}
+      r.notified = true;
+      changed = true;
+    }
+  });
+  if (changed) save();
+}
+function startReminderWatcher() {
+  checkDueReminders();
+  setInterval(checkDueReminders, 60000);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") checkDueReminders();
+  });
 }
 async function requestNotifications() {
   try {
@@ -851,3 +895,4 @@ if (state.onboardingComplete) renderShell("home");
 else onboarding();
 if ("serviceWorker" in navigator)
   navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+startReminderWatcher();

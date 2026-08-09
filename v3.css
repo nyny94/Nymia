@@ -78,3 +78,13 @@
 html[data-theme="dark"] body,html[data-theme="dark"] .shell{background:#17131d;color:#f8f4fb}html[data-theme="dark"] article,html[data-theme="dark"] button,html[data-theme="dark"] nav,html[data-theme="dark"] .health-dashboard,html[data-theme="dark"] .wellness-dashboard{--line:#43394a;background-color:#211a28;color:#f8f4fb}html[data-theme="dark"] p,html[data-theme="dark"] small{color:#c9bfce}html[data-color="rose"]{--purple:#d64d9b;--purple-dark:#a93078;--lav:#fff0f8}
 @media(max-width:600px){.functional-page{padding-top:18px}.inner-head h2{font-size:22px}.inner-head p{font-size:10px}.overview-grid{grid-template-columns:repeat(2,1fr)}.journal-topics{grid-template-columns:repeat(2,1fr)}.journal-topics .topic-button:last-child{grid-column:1/-1}.duration-grid button{padding:18px 5px}.file-row{grid-template-columns:34px 1fr auto}.file-row>button:first-of-type{grid-column:2}.reminder-add{top:18px}}
 .page-colibri .fab{display:none}.page-colibri .chat-compose{z-index:20}
+
+/* Aucun écran de référence n’est utilisé comme image : visuels propres sans texte parasite */
+.wellness-figure{right:2%;bottom:3%;width:40%;height:92%;background:url('hummingbird.svg') center/contain no-repeat;filter:drop-shadow(0 8px 10px rgba(100,49,139,.12))}
+.wellness-program.fitness,.wellness-program.food,.wellness-program.calm{background-image:none;background-size:auto}
+.wellness-program.fitness{background:linear-gradient(135deg,#5f8191,#b784bb)}
+.wellness-program.food{background:linear-gradient(135deg,#5f984f,#e0a348)}
+.wellness-program.calm{background:linear-gradient(135deg,#7b6aa8,#c487a8)}
+.profile-notebook{background:linear-gradient(135deg,#f4e7ff,#dbc1f1);position:relative}
+.profile-notebook:after{content:"";position:absolute;inset:10px;background:url('hummingbird.svg') center/contain no-repeat;opacity:.8}
+@media(max-width:600px){.wellness-figure{right:0;width:42%;height:90%}}
